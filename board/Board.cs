@@ -42,6 +42,22 @@ namespace Checkers.board
             }
         }
 
+        public void Update()
+        {
+            if (IsMouseButtonPressed(MouseButton.MOUSE_BUTTON_LEFT))
+            {
+                OnClick(GetMousePosition());
+            }
+        }
+
+        private void OnClick(Vector2 position)
+        {
+            foreach(Tile tile in _tiles)
+            {
+                bool clicked = tile.OnClick(position);
+            }
+        }
+
         public void Init(string fen)
         {
             Console.WriteLine($"FEN: {fen}");

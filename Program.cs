@@ -23,6 +23,7 @@ namespace Checkers
             {
                 BeginDrawing();
                 ClearBackground(Color.RAYWHITE);
+                board.Update();
                 board.Draw();
                 EndDrawing();
             }

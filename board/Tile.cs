@@ -8,13 +8,14 @@ namespace Checkers.board
     {
         private Vector2 _positionOnBoard;
         private Rectangle _rectangle;
+        private int _size;
         private bool _dark;
 
         private Piece? _piece;
 
         public Tile(int x, int y, int size, bool dark)
         {
-
+            _size = size;
             _rectangle = new(x, y, x + size, y + size);
 
             _positionOnBoard = new Vector2(x / size, y / size);
@@ -44,9 +45,16 @@ namespace Checkers.board
             }
         }
 
-        public void OnClick()
+        public bool OnClick(Vector2 position)
         {
-            Console.WriteLine($"X: {_positionOnBoard.X}, Y: {_positionOnBoard.Y}");
+            //TODO 03-10-2022: simplify by one line return, for now keep console.writeline cuz its easy to identify which tile has been clicked.
+            if (_rectangle.y < position.Y && position.Y < _rectangle.y + _size && _rectangle.x < position.X && position.X < _rectangle.x + _size)
+            {
+                Console.WriteLine($"X: {_positionOnBoard.X}, Y: {_positionOnBoard.Y}");
+                return true;
+            }
+            else
+                return false;
         }
 
     }
