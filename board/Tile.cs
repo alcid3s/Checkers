@@ -6,20 +6,18 @@ namespace Checkers.board
 {
     public class Tile
     {
-        private Texture2D _texture;
         private Vector2 _positionOnBoard;
-        private int _x, _y;
+        private Rectangle _rectangle;
         private bool _dark;
 
         private Piece? _piece;
 
-        public Tile(Texture2D texture, int x, int y, bool dark)
+        public Tile(int x, int y, int size, bool dark)
         {
-            _texture = texture;
-            _x = x;
-            _y = y;
 
-            _positionOnBoard = new Vector2(x / texture.width, y / texture.height);
+            _rectangle = new(x, y, x + size, y + size);
+
+            _positionOnBoard = new Vector2(x / size, y / size);
             _dark = dark;
         }
 
@@ -35,10 +33,14 @@ namespace Checkers.board
 
         public void Draw()
         {
-            DrawTexture(_texture, _x, _y, WHITE);
-            if(_piece != null)
+            if(_dark)
+                DrawRectangleRec(_rectangle, Color.DARKBROWN);
+            else
+                DrawRectangleRec(_rectangle, Color.BROWN);
+
+            if (_piece != null)
             {
-                DrawTexture(_piece.Texture, _x, _y, WHITE);
+                DrawTexture(_piece.Texture, (int) _rectangle.x, (int) _rectangle.y, WHITE);
             }
         }
 

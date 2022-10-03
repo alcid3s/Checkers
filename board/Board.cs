@@ -10,12 +10,11 @@ namespace Checkers.board
         private Tile[] _tiles = new Tile[100];
         private bool _dark;
 
-        private static Texture2D _whiteTile = LoadTexture("../../../res/Tile1.png");
-        private static Texture2D _darkTile = LoadTexture("../../../res/Tile2.png");
+        private const int sizeOfSquare = 96;
 
         public Board()
         {
-            _dark = false;
+            _dark = true;
             for (int y = 0; y < 10; y++)
             {
                 // So not every rank has the same color
@@ -25,9 +24,9 @@ namespace Checkers.board
                 {
                     // Console.WriteLine($"Count: {y * 10 + x}");
                     if (_dark)
-                        _tiles[y * 10 + x] = new Tile(_whiteTile, _whiteTile.width * x, _whiteTile.height * y, _dark);
+                        _tiles[y * 10 + x] = new Tile(x * sizeOfSquare, y * sizeOfSquare, sizeOfSquare, _dark);
                     else
-                        _tiles[y * 10 + x] = new Tile(_darkTile, _darkTile.width * x, _darkTile.height * y, _dark);
+                        _tiles[y * 10 + x] = new Tile(x * sizeOfSquare, y * sizeOfSquare, sizeOfSquare, _dark);
 
                     // So the next Tile has the opposite color
                     _dark = !_dark;
