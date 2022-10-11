@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Checkers.graphics.components;
+using Checkers.graphics.components.renderer;
 
 namespace Checkers.graphics
 {
@@ -31,12 +32,24 @@ namespace Checkers.graphics
 
         public void Draw()
         {
-            //Renderer needed
+            foreach (Renderer renderer in GetComponents<Renderer>())
+            {
+                if (!renderer.Enabled)
+                    continue;
+
+                renderer.Draw();
+            }
         }
 
         public void Update()
         {
-            //Component needs an Update() function
+            foreach (Component component in _components)
+            {
+                if (!component.Enabled)
+                    continue;
+
+                component.Update();
+            }
         }
 
         public void AddComponent(Component component)
