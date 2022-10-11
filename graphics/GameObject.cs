@@ -39,6 +39,11 @@ namespace Checkers.graphics
 
                 renderer.Draw();
             }
+
+            foreach (GameObject child in Children)
+            {
+                child.Draw();
+            }
         }
 
         public void Update()
@@ -49,6 +54,11 @@ namespace Checkers.graphics
                     continue;
 
                 component.Update();
+            }
+
+            foreach (GameObject child in Children)
+            {
+                child.Update();
             }
         }
 
