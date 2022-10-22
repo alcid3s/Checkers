@@ -1,4 +1,5 @@
 ﻿using Raylib_cs;
+using static Raylib_cs.Raylib;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,7 +14,7 @@ namespace Checkers.graphics.components.interactable.mouse_event
 
         public override void Update()
         {
-            if (Raylib.IsMouseButtonPressed(MouseButton.MOUSE_BUTTON_LEFT) && (Collider?.HasCollision() ?? false))
+            if (IsMouseButtonPressed(MouseButton.MOUSE_BUTTON_LEFT) && (Collider?.HasCollision() ?? false))
             {
                 OnAction();
             }
