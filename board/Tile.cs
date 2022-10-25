@@ -2,9 +2,11 @@
 using static Raylib_cs.Raylib;
 using static Raylib_cs.Color;
 using System.Numerics;
+using Checkers.graphics;
+
 namespace Checkers.board
 {
-    public class Tile
+    public class Tile : GameObject
     {
         private Vector2 _positionOnBoard;
         private Rectangle _rectangle;

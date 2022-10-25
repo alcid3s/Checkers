@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Checkers.graphics.components.interactable
 {
-    internal class MouseCollider
+    public class MouseCollider
     {
         private IShape _collider;
         private Interactable _parent;

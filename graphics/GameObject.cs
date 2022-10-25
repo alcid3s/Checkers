@@ -8,7 +8,7 @@ using Checkers.graphics.components.renderer;
 
 namespace Checkers.graphics
 {
-    internal class GameObject : INode
+    public class GameObject : INode
     {
         public GameObject? Parent { get; private set; }
         public Transform Transform { get; set; }

@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Checkers.graphics.components.renderer
 {
-    internal class ShapeRenderer : Renderer
+    public class ShapeRenderer : Renderer
     {
         public IShape Shape { get; set; }
         public Color Color { get; set; }

@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Checkers.graphics.shapes
 {
-    internal interface IShape
+    public interface IShape
     {
         void Draw(Transform transform, Color color);
         bool InBounds(Transform transform, Vector2 point);

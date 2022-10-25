@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Checkers.graphics
 {
-    internal interface INode
+    public interface INode
     {
         void Draw();
         void Update();

@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Checkers.graphics.components.interactable.mouse_event
 {
-    internal class MouseButtonPress : MouseEvent
+    public class MouseButtonPress : MouseEvent
     {
         public MouseButtonPress(OnAction onAction) : base(onAction) { }
 

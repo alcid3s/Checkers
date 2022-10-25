@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Checkers.graphics.components.interactable
 {
-    internal class Interactable : Component
+    public class Interactable : Component
     {
         public MouseCollider? Collider { private get; set; }
 

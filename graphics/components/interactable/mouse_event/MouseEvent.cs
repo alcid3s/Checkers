@@ -8,7 +8,7 @@ namespace Checkers.graphics.components.interactable.mouse_event
 {
     public delegate void OnAction();
 
-    internal abstract class MouseEvent
+    public abstract class MouseEvent
     {
         public OnAction OnAction { get; set; }
 

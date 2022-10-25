@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Checkers.graphics.components
 {
-    internal abstract class Component
+    public abstract class Component
     {
         public bool Enabled { get; set; } = true;
 

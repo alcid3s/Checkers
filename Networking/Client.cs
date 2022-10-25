@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Checkers.Networking
 {
-    internal class Client
+    public class Client
     {
         private short _port;
         private IPAddress _address;

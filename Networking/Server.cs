@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Checkers.Networking
 {
-    internal class Server
+    public class Server
     {
         private Socket _serverSocket;
         private Client[] _clientList = new Client[2];

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Checkers.graphics.components.renderer
 {
-    internal abstract class Renderer : Component
+    public abstract class Renderer : Component
     {
         public Renderer(GameObject parent) : base(parent) { }
 

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Checkers.graphics
 {
-    internal class Transform
+    public class Transform
     {
         private GameObject _parent;
         public Vector2 LocalPosition { get; set; }
