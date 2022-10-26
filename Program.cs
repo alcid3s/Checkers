@@ -19,7 +19,6 @@ namespace Checkers
             const int screenHeight = 960;
             InitWindow(screenWidth, screenHeight, "Checkers");
 
-            
             SetTraceLogLevel(LOG_NONE);
 
             ScreenManager manager = new ScreenManager(Color.LIME);

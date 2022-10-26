@@ -34,7 +34,7 @@ namespace Checkers.board
             this._piece = null;
         }
 
-        public void Draw()
+        public new void Draw()
         {
             if (_dark)
                 DrawRectangleRec(_rectangle, Color.DARKBROWN);

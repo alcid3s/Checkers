@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using static Checkers.Screens.ScreenManager;
+using Checkers.Networking;
 
 namespace Checkers.Screens
 {
@@ -18,7 +19,8 @@ namespace Checkers.Screens
             HostOrJoinState,
             HostState,
             JoinState,
-            PlayState
+            PlayState,
+            PlayStateWithServer
         }
 
         public static string Setup = "1p1p1p1p1p/p1p1p1p1p1/1p1p1p1p1p/p1p1p1p1p1/10/10/1P1P1P1P1P/P1P1P1P1P1/1P1P1P1P1P/P1P1P1P1P1";
@@ -29,8 +31,10 @@ namespace Checkers.Screens
         private MainScreen _mainScreen = new(Color.LIME);
         private HostOrJoinScreen _hostOrJoinScreen = new();
         private Board _board = new();
+        private Server _server;
 
-
+        private bool _firstTimeRunBoard = true;
+        
         public ScreenManager(Color backGround)
         {
             _backGround = backGround;
@@ -59,11 +63,15 @@ namespace Checkers.Screens
                     ClearBackground(_backGround);
                     _board.Draw();
                     break;
+                case ScreenState.PlayStateWithServer:
+                    ClearBackground(_backGround);
+                    _board.Draw();
+                    break;
             }
         }
 
         public override void Update()
-        {
+        { 
             switch (State)
             {
                 case ScreenState.MainScreenState:
@@ -77,6 +85,15 @@ namespace Checkers.Screens
                 case ScreenState.JoinState:
                     break;
                 case ScreenState.PlayState:
+                    _board.Update();
+                    break;
+                case ScreenState.PlayStateWithServer:
+                    if (_firstTimeRunBoard)
+                    {
+                        _server = new Server(1337);
+                        _server.Run();
+                        _firstTimeRunBoard = false;
+                    }
                     _board.Update();
                     break;
             }
