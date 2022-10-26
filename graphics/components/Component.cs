@@ -12,7 +12,7 @@ namespace Checkers.graphics.components
 
         protected GameObject Parent;
 
-        public Transform Transform { get => Parent.Transform }
+        public Transform Transform { get => Parent.Transform; }
 
         public Component(GameObject parent)
         {

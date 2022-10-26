@@ -6,7 +6,7 @@ using Checkers.graphics;
 
 namespace Checkers.board
 {
-    public class Board : GameObject
+    public class Board 
     {
         private Tile[] _tiles = new Tile[100];
         private bool _dark;
@@ -31,6 +31,16 @@ namespace Checkers.board
 
                     // So the next Tile has the opposite color
                     _dark = !_dark;
+                }
+            }
+        }
+
+        public void Update()
+        {
+            foreach(Tile tile in _tiles)
+            {
+                if (tile.OnClick(GetMousePosition()){
+                    Console.WriteLine($"X: {tile.PositionOnBoard.X} Y: {tile.PositionOnBoard.Y}");
                 }
             }
         }
