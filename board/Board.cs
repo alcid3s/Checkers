@@ -6,7 +6,7 @@ using Checkers.graphics;
 
 namespace Checkers.board
 {
-    public class Board 
+    public class Board
     {
         private Tile[] _tiles = new Tile[100];
         private bool _dark;

@@ -1,4 +1,5 @@
 ﻿using Checkers.board;
+using Checkers.Screens;
 using Raylib_cs;
 using static Raylib_cs.Raylib;
 using static Raylib_cs.TraceLogLevel;
@@ -7,7 +8,7 @@ namespace Checkers
 {
     internal class Program
     {
-        public static string Setup = "1p1p1p1p1p/p1p1p1p1p1/1p1p1p1p1p/p1p1p1p1p1/10/10/1P1P1P1P1P/P1P1P1P1P1/1P1P1P1P1P/P1P1P1P1P1";
+
         static void Main(string[] args)
         {
             SetTraceLogLevel(LOG_NONE);
@@ -16,15 +17,13 @@ namespace Checkers
             const int screenHeight = 960;
             InitWindow(screenWidth, screenHeight, "Checkers");
 
-            Board board = new();
-            board.Init(Setup);
+            ScreenManager manager = new(Color.LIME);
 
             while (!WindowShouldClose())
             {
                 BeginDrawing();
-                ClearBackground(Color.RAYWHITE);
-                board.Update();
-                board.Draw();
+                manager.Update();
+                manager.Draw();
                 EndDrawing();
             }
         }

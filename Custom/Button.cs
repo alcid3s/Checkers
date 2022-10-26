@@ -7,20 +7,30 @@ using System.Linq;
 using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
+using Checkers.graphics.components.interactable.mouse_event;
 
 namespace Checkers.Custom
 {
     public class Button : INode
     {
-        private Rectangle _rectangle;
+        public OnAction OnAction { get; set; }
 
-        public Button(Vector2 size, Vector2 position)
+        private Rectangle _rectangle;
+        private Color _color;
+        private string _text;
+        private short _sizeText;
+
+        public Button(Rectangle rectangle, Color color, short sizeText, string text)
         {
-            _rectangle = new Rectangle(position.X, position.Y, position.X + size.X, position.Y + size.Y);
+            _rectangle = rectangle;
+            _color = color;
+            _text = text;
+            _sizeText = sizeText;
         }
         public void Draw()
         {
-            DrawRectangleRec(_rectangle, Color.BLUE);
+            DrawRectangleRec(_rectangle, _color);
+            DrawText(_text, (int) (_rectangle.x + (_rectangle.x / 8)), (int) (_rectangle.y + (_rectangle.y / 8)), _sizeText, Color.BLACK);
         }
 
         public void Update()
@@ -31,7 +41,7 @@ namespace Checkers.Custom
                 if(_rectangle.x < mousePosition.X && _rectangle.x + _rectangle.width > mousePosition.X 
                     && _rectangle.y < mousePosition.Y && _rectangle.y + _rectangle.height > mousePosition.Y)
                 {
-                    Console.WriteLine("Button clicked");
+                    OnAction();
                 }
             }
         }
