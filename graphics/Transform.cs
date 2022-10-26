@@ -63,10 +63,11 @@ namespace Checkers.graphics
         private Stack<Transform> TransformStack()
         {
             Stack<Transform> transforms = new Stack<Transform>();
-            GameObject gameObject = _parent;
+            GameObject? gameObject = _parent;
             while (gameObject != null)
             {
                 transforms.Push(gameObject.Transform);
+                gameObject = gameObject.Parent;
             }
             return transforms;
         }

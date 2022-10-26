@@ -1,5 +1,4 @@
 ﻿using Checkers.graphics;
-using Raylib_cs;
 using static Raylib_cs.Raylib;
 using System;
 using System.Collections.Generic;
@@ -7,33 +6,33 @@ using System.Linq;
 using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
+using Checkers.graphics.shapes;
+using Checkers.graphics.components.renderer;
+using Checkers.graphics.components.interactable;
+using Checkers.graphics.components.interactable.mouse_event;
 
 namespace Checkers.Custom
 {
-    public class Button : INode
+    public class Button : GameObject
     {
-        private Rectangle _rectangle;
+        private IShape _shape;
 
-        public Button(Vector2 size, Vector2 position)
+        public Button()
         {
-            _rectangle = new Rectangle(position.X, position.Y, position.X + size.X, position.Y + size.Y);
-        }
-        public void Draw()
-        {
-            DrawRectangleRec(_rectangle, Color.BLUE);
-        }
-
-        public void Update()
-        {
-            if (IsMouseButtonPressed(MouseButton.MOUSE_BUTTON_LEFT))
+            _shape = new RectangleShape();
+            ShapeRenderer renderer = new ShapeRenderer(this, _shape);
+            renderer.Color = new Raylib_cs.Color(128, 96, 32, 255);
+            AddComponent(renderer);
+            Interactable interactable = new Interactable(this);
+            MouseCollider collider = new MouseCollider(_shape, interactable);
+            interactable.Collider = collider;
+            MouseEvent mEvent = new MouseButtonPress(() =>
             {
-                Vector2 mousePosition = GetMousePosition();
-                if(_rectangle.x < mousePosition.X && _rectangle.x + _rectangle.width > mousePosition.X 
-                    && _rectangle.y < mousePosition.Y && _rectangle.y + _rectangle.height > mousePosition.Y)
-                {
-                    Console.WriteLine("Button clicked");
-                }
-            }
+                Console.WriteLine("yay");
+            });
+            mEvent.SetCollider(collider);
+            interactable.SetEvent(mEvent);
+            AddComponent(interactable);
         }
     }
 }

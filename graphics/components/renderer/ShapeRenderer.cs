@@ -21,7 +21,7 @@ namespace Checkers.graphics.components.renderer
 
         protected override void Render(Transform transform)
         {
-            Shape.Draw(Parent.Transform, Color);
+            Shape.Draw(transform, Color);
         }
     }
 }
