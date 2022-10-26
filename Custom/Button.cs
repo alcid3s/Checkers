@@ -17,11 +17,11 @@ namespace Checkers.Custom
     {
         private IShape _shape;
 
-        public Button()
+        public Button(GameObject parent) : base(parent) 
         {
             _shape = new RectangleShape();
             ShapeRenderer renderer = new ShapeRenderer(this, _shape);
-            renderer.Color = new Raylib_cs.Color(128, 96, 32, 255);
+            renderer.Color = new Raylib_cs.Color(0x80, 0x60, 0x20, 0xFF);
             AddComponent(renderer);
             Interactable interactable = new Interactable(this);
             MouseCollider collider = new MouseCollider(_shape, interactable);

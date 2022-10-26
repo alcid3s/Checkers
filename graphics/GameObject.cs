@@ -62,7 +62,7 @@ namespace Checkers.graphics
             }
         }
 
-        public void AddComponent(Component component)
+        protected void AddComponent(Component component)
         {
             _components.Add(component);
         }

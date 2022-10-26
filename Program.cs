@@ -34,14 +34,18 @@ namespace Checkers
             }
             */
 
-            GameObject obj = new Button();
+            Scene scene = new Scene();
+
+            GameObject obj = new Button(scene);
             obj.Transform = new graphics.Transform(obj, new System.Numerics.Vector2(200, 100), new System.Numerics.Vector2(150, 50));
+            GameObject obj2 = new Button(scene);
+            obj2.Transform = new graphics.Transform(obj2, new System.Numerics.Vector2(200, 200), new System.Numerics.Vector2(200, 50));
             while (!WindowShouldClose())
             {
                 BeginDrawing();
                 ClearBackground(Color.RAYWHITE);
-                obj.Update();
-                obj.Draw();
+                scene.Update();
+                scene.Draw();
                 EndDrawing();
             }
         }
