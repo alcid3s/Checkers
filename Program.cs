@@ -1,5 +1,6 @@
 ﻿using Checkers.board;
-using Checkers.Screens;
+using Checkers.Custom;
+using Checkers.graphics;
 using Raylib_cs;
 using static Raylib_cs.Raylib;
 using static Raylib_cs.TraceLogLevel;
@@ -17,13 +18,29 @@ namespace Checkers
             const int screenHeight = 960;
             InitWindow(screenWidth, screenHeight, "Checkers");
 
-            ScreenManager manager = new(Color.LIME);
+            /*
+            SetTraceLogLevel(LOG_NONE);
+
+            Board board = new();
+            board.Init(Setup);
 
             while (!WindowShouldClose())
             {
                 BeginDrawing();
                 manager.Update();
                 manager.Draw();
+                EndDrawing();
+            }
+            */
+
+            GameObject obj = new Button();
+            obj.Transform = new graphics.Transform(obj, new System.Numerics.Vector2(200, 100), new System.Numerics.Vector2(150, 50));
+            while (!WindowShouldClose())
+            {
+                BeginDrawing();
+                ClearBackground(Color.RAYWHITE);
+                obj.Update();
+                obj.Draw();
                 EndDrawing();
             }
         }

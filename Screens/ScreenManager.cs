@@ -28,7 +28,7 @@ namespace Checkers.Screens
 
         private MainScreen _mainScreen = new(Color.LIME);
         private HostOrJoinScreen _hostOrJoinScreen = new();
-        private Board _board = new Board();
+        private Board _board = new();
 
 
         public ScreenManager(Color backGround)

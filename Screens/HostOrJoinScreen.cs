@@ -22,9 +22,10 @@ namespace Checkers.Screens
 
         public override void Update()
         {
-            _hostbtn.Draw();
+            _hostbtn.Update();
             _hostbtn.OnAction += delegate
             {
+                Console.WriteLine("PLASY");
                 ScreenManager.State = ScreenManager.ScreenState.PlayState;
             };
         }
