@@ -9,6 +9,11 @@ namespace Checkers.Screens
 {
     internal class MainScreen : INode
     {
+        public MainScreen()
+        {
+
+        }
+
         public void Draw()
         {
             

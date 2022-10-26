@@ -35,16 +35,6 @@ namespace Checkers.board
             }
         }
 
-        public void Update()
-        {
-            foreach(Tile tile in _tiles)
-            {
-                if (tile.OnClick(GetMousePosition()){
-                    Console.WriteLine($"X: {tile.PositionOnBoard.X} Y: {tile.PositionOnBoard.Y}");
-                }
-            }
-        }
-
         public void Draw()
         {
             foreach (Tile tile in _tiles)
@@ -65,7 +55,10 @@ namespace Checkers.board
         {
             foreach(Tile tile in _tiles)
             {
-                bool clicked = tile.OnClick(position);
+                if (tile.OnClick(position))
+                {
+                    Console.WriteLine($"X: {tile.PositionOnBoard.X}, Y: {tile.PositionOnBoard.Y}");
+                }
             }
         }
 

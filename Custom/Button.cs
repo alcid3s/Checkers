@@ -25,7 +25,15 @@ namespace Checkers.Custom
 
         public void Update()
         {
-            // TODO: CHECK IF RECTANGLE IS PRESSED
+            if (IsMouseButtonPressed(MouseButton.MOUSE_BUTTON_LEFT))
+            {
+                Vector2 mousePosition = GetMousePosition();
+                if(_rectangle.x < mousePosition.X && _rectangle.x + _rectangle.width > mousePosition.X 
+                    && _rectangle.y < mousePosition.Y && _rectangle.y + _rectangle.height > mousePosition.Y)
+                {
+                    Console.WriteLine("Button clicked");
+                }
+            }
         }
     }
 }

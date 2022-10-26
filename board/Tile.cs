@@ -47,16 +47,10 @@ namespace Checkers.board
             }
         }
 
-        public bool OnClick(Vector2 mousePosition)
+        public bool OnClick(Vector2 position)
         {
-            if (_rectangle.y < mousePosition.Y && mousePosition.Y < _rectangle.y + _rectangle.height && _rectangle.x < mousePosition.X && mousePosition.X < _rectangle.x + _rectangle.width)
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
+            //TODO 03-10-2022: simplify by one line return, for now keep console.writeline cuz its easy to identify which tile has been clicked.
+            return (_rectangle.y < position.Y && position.Y < _rectangle.y + _size && _rectangle.x < position.X && position.X < _rectangle.x + _size);
         }
     }
 }
