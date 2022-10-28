@@ -201,12 +201,6 @@ namespace Checkers.board
             bool endOfFEN = false;
             foreach (char c in fen)
             {
-                var dict = new Dictionary<char, Piece>()
-                {
-                    ['P'] = new ManPiece(Piece.Side.White),
-                    ['p'] = new ManPiece(Piece.Side.Black)
-                };
-
                 if (!endOfFEN)
                 {
                     if (c == '/')
@@ -220,9 +214,15 @@ namespace Checkers.board
                     }
                     else if (c.Equals(';'))
                         endOfFEN = true;
-                    else if (c == 'p' || c == 'P')
+                    else if(c == 'p' || c == 'P')
                     {
-                        Piece piece = dict[c];
+                        Piece piece;
+
+                        // A substitute for the earlier used Dictionary.
+                        if(c == 'p')
+                            piece = new ManPiece(Piece.Side.Black);
+                        else
+                            piece = new ManPiece(Piece.Side.White);
 
                         // Gets tile on which a piece needs to spawn.
                         Tiles[(y * 10) + x].Attach(piece);
