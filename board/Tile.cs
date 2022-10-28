@@ -40,7 +40,7 @@ namespace Checkers.board
             this.Piece = piece;
         }
 
-        public void Detach(Piece piece)
+        public void Detach()
         {
             this.Piece = null;
         }
@@ -70,15 +70,6 @@ namespace Checkers.board
         {
             int bounds = GetPositionInTilesArray() - 11;
             return bounds >= 0 && bounds <= 99 && !CheckTile(bounds) ? bounds : null;
-
-            //if(bounds >= 0 && bounds <= 99 && !CheckTile(bounds))
-            //{
-            //    return bounds;
-            //}
-            //else
-            //{
-            //    return null;
-            //}
         }
 
         public int? GetNorthEast()

@@ -57,6 +57,12 @@ namespace Checkers.Networking
                         ScreenManager.Board.HasFen = response;
                         firstMessage = false;
                     }
+                    else
+                    {
+                        Console.WriteLine($"parsing: {response[0]}");
+                        ScreenManager.Board.GotReply = response[0];
+                    }
+                        
                 }
             }
         }
@@ -65,7 +71,6 @@ namespace Checkers.Networking
         {
             if(_socket != null)
                 _ = _socket.SendAsync(Encoding.UTF8.GetBytes(message), SocketFlags.Partial);
-            
         }
     }
 }

@@ -10,6 +10,9 @@ namespace Checkers.board
 {
     public class Board
     {
+        // Used for when the server sends a message to the client.
+        public char GotReply { get; set; } = ' ';
+
         // bool and string are used so the server can send a FEN string to the client.
         public bool HasInitialised { get; private set; } = false;
         public string HasFen { get; set; } = string.Empty;
@@ -22,7 +25,8 @@ namespace Checkers.board
         private Piece.Side _sideOfPlayer;
         private SelectedPosition _selectedPosition;
 
-        private bool _isPlayer;
+        private readonly bool _isPlayer;
+
 
         struct SelectedPosition
         {
@@ -104,6 +108,11 @@ namespace Checkers.board
                         // if the tile clicked is a legal move for the piece.
                         if (legalMoves.Contains(tile.GetPositionInTilesArray()))
                         {
+                            new Thread(() =>
+                            {
+                                AwaitReplyFromServer(tile);
+                            }).Start();
+
                             _ = SendToServer(tile);
                         }
                     }
@@ -111,11 +120,40 @@ namespace Checkers.board
             }
         }
 
+        private void AwaitReplyFromServer(Tile tile)
+        {
+            while (GotReply.Equals(' ')) ;
+
+            if (GotReply.Equals('T'))
+            {
+                GotReply = ' ';
+
+                // They wont every be null but it removes all errors :)
+                if(_selectedPosition.Piece != null && _selectedPosition.Tile != null)
+                {
+                    tile.Attach(_selectedPosition.Piece);
+
+                    _selectedPosition.Tile.Detach();
+
+                    _selectedPosition = new(null, null);
+
+                    foreach(Tile t in Tiles)
+                    {
+                        t.ResetColor();
+                    }
+                }
+            }
+            else if (GotReply.Equals('F'))
+            {
+
+            }
+        }
+
         private async Task SendToServer(Tile tile)
         {
-            if(_selectedPosition.Tile != null)
+            if (_selectedPosition.Tile != null)
             {
-                string message = $"{_selectedPosition.Tile.GetPositionInTilesArray()}:{typeof(Piece).ToString()}:{tile.GetPositionInTilesArray()};";
+                string message = $"{_selectedPosition.Tile.GetPositionInTilesArray()}:{typeof(Piece)}:{tile.GetPositionInTilesArray()};";
                 await Client.Send(message);
             }
         }
@@ -167,7 +205,6 @@ namespace Checkers.board
                     }
                 }
             }
-            Console.WriteLine("side: " + _sideOfPlayer.ToString());
             HasInitialised = true;
         }
 
