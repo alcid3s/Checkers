@@ -101,13 +101,13 @@ namespace Checkers.board
                             t.ResetColor();
                         }
 
-                        if (tile.Piece.CalculateForcingMoves(tile).Count > 0)
-                            tile.Piece.CalculateForcingMoves(tile).ForEach(position =>
+                        if (tile.Piece.CalculateForcingMoves().Count > 0)
+                            tile.Piece.CalculateForcingMoves().ForEach(position =>
                             {
                                 ScreenManager.Board.Tiles[position].Color = Color.VIOLET;
                             });
                         else
-                            tile.Piece.CalculateRegularMoves(tile).ForEach(position =>
+                            tile.Piece.CalculateRegularMoves().ForEach(position =>
                             {
                                 ScreenManager.Board.Tiles[position].Color = Color.VIOLET;
                             });
@@ -116,9 +116,9 @@ namespace Checkers.board
                     // If the player already selected a position and presses on a tile without a piece on it.
                     else if (tile.Piece == null && _selectedPosition.Tile != null && _selectedPosition.Piece != null)
                     {
-                        List<int> legalMoves = _selectedPosition.Piece.CalculateForcingMoves(_selectedPosition.Tile);
+                        List<int> legalMoves = _selectedPosition.Piece.CalculateForcingMoves();
                         if (legalMoves.Count == 0)
-                            legalMoves = _selectedPosition.Piece.CalculateRegularMoves(_selectedPosition.Tile);
+                            legalMoves = _selectedPosition.Piece.CalculateRegularMoves();
 
                         // if the tile clicked is a legal move for the piece.
                         if (legalMoves.Contains(tile.GetPositionInTilesArray()))
@@ -239,7 +239,7 @@ namespace Checkers.board
                 if (Tiles[currentPosition].Piece != null)
                 {
                     Console.WriteLine($"SERVER: checking if move is legal: {currentPosition}");
-                    List<int> legalMoves = Tiles[currentPosition].Piece.CalculateRegularMoves(Tiles[currentPosition]);
+                    List<int> legalMoves = Tiles[currentPosition].Piece.CalculateRegularMoves();
 
                     Console.WriteLine($"SERVER: SIZE OF LIST: {legalMoves.Count}");
                     legalMoves.ForEach(m =>

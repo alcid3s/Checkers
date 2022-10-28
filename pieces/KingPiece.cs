@@ -25,8 +25,10 @@ namespace Checkers.pieces
             UnloadImage(image);
         }
 
-        public override List<int> CalculateForcingMoves(Tile currentPosition)
+        public override List<int> CalculateForcingMoves()
         {
+            Tile currentPosition = Tile();
+
             if (currentPosition.Piece == null)
                 return new List<int>();
 
@@ -42,8 +44,10 @@ namespace Checkers.pieces
 #pragma warning restore CS8629
         }
 
-        public override List<int> CalculateRegularMoves(Tile currentPosition)
+        public override List<int> CalculateRegularMoves()
         {
+            Tile currentPosition = Tile();
+
             if (currentPosition.Piece == null)
                 return new List<int>();
 
