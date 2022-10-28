@@ -114,6 +114,8 @@ namespace Checkers.Networking
             
                     (int, string, int) data = ParseMessage(information);
 
+                    Console.WriteLine(data);
+
                     //Check if move player wants to do is legal.
                     if (_board.IsLegalMove(data.Item1, data.Item2, data.Item3))
                     {

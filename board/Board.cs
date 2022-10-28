@@ -115,9 +115,9 @@ namespace Checkers.board
                     // If the player already selected a position and presses on a tile without a piece on it.
                     else if (tile.Piece == null && PositionSelected.Tile != null && PositionSelected.Piece != null)
                     {
-                        List<int> legalMoves = PositionSelected.Piece.CalculateRegularMoves(PositionSelected.Tile);
+                        List<int> legalMoves = PositionSelected.Piece.CalculateRegularMoves();
                         if (legalMoves.Count == 0)
-                            legalMoves = _selectedPosition.Piece.CalculateRegularMoves();
+                            legalMoves = PositionSelected.Piece.CalculateRegularMoves();
 
                         // if the tile clicked is a legal move for the piece.
                         if (legalMoves.Contains(tile.GetPositionInTilesArray()))
@@ -155,7 +155,7 @@ namespace Checkers.board
                 // They wont every be null but it removes all errors :)
                 if(PositionSelected.Piece != null && PositionSelected.Tile != null)
                 {
-                    Tiles[tile.GetPositionInTilesArray()].Attach(_selectedPosition.Tile.Detach());
+                    //Tiles[tile.GetPositionInTilesArray()].Attach(PositionSelected.Tile.Detach());
                     //tile.Attach(_selectedPosition.Piece);
 
                    
@@ -246,7 +246,7 @@ namespace Checkers.board
         // This method should only be used by the server to verify if the move is legal.
         public bool IsLegalMove(int currentPosition, string typeOfPiece, int futurePosition)
         {
-            /*
+            
             if (!_isPlayer)
             {
                 Console.WriteLine($"SERVER: currentpos: {currentPosition} and containspiece = {Tiles[currentPosition].Piece != null}");
@@ -254,7 +254,8 @@ namespace Checkers.board
                 // Check if the place selected contains a piece on the board the server holds
                 if (Tiles[currentPosition].Piece != null)
                 {
-                    List<int> legalMoves = Tiles[currentPosition].Piece.CalculateRegularMoves(Tiles[currentPosition]);
+                    Console.WriteLine("jjj:" + Tiles[currentPosition].Piece.Tile() == null);
+                    List<int> legalMoves = Tiles[currentPosition].Piece.CalculateRegularMoves();
 
                     // If the legalMoves are correct according to the server return true
                     if (legalMoves.Contains(futurePosition))
@@ -262,7 +263,7 @@ namespace Checkers.board
                         return true;
                     }
                 }
-            }*/
+            }
             return false;
             
         }
