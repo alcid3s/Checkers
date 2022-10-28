@@ -61,7 +61,7 @@ namespace Checkers.board
         }
 
         // Methods used for navigating board.
-        private int GetPositionInTilesArray()
+        public int GetPositionInTilesArray()
         {
             return (int)(PositionOnBoard.X + (PositionOnBoard.Y * 10));
         }

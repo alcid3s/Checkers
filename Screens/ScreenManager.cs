@@ -25,7 +25,7 @@ namespace Checkers.Screens
         }
 
         public static ScreenState State = ScreenState.MainScreenState;
-        public static Board Board = new();
+        public static Board Board = new(true);
 
         private Color _backGround;
 

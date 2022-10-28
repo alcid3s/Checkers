@@ -15,7 +15,7 @@ namespace Checkers.Networking
         private readonly short _port;
         private readonly IPAddress _address;
 
-        private Socket? _socket;
+        private static Socket? _socket;
 
         public Client(string ip, short port)
         {
@@ -61,9 +61,8 @@ namespace Checkers.Networking
             }
         }
 
-        public void Send(Vector2 posOfPiece, Vector2 newPosOfPiece)
+        public static void Send(string message)
         {
-            string message = "" + posOfPiece.X + '-' + posOfPiece.Y + ':' + newPosOfPiece.X + '-' + newPosOfPiece;
             if(_socket != null)
                 _socket.Send(Encoding.UTF8.GetBytes(message));
         }

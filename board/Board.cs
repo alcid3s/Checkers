@@ -3,6 +3,8 @@ using static Raylib_cs.Raylib;
 using System.Numerics;
 using Checkers.graphics;
 using Checkers.Screens;
+using Checkers.Networking;
+using System.Text;
 
 namespace Checkers.board
 {
@@ -14,34 +16,47 @@ namespace Checkers.board
 
         // Used to create the board.
         public Tile[] Tiles { get; private set; } = new Tile[100];
-        private bool _dark;
 
         private const int sizeOfSquare = 96;
 
-        private Piece? _selectedPiece = null;
-
         private Piece.Side _sideOfPlayer;
+        private SelectedPosition _selectedPosition;
 
-        public Board()
+        private bool _isPlayer;
+
+        struct SelectedPosition
         {
-            _dark = true;
+            public Tile? Tile { get; set; }
+            public Piece? Piece { get; set; }
+
+            public SelectedPosition(Tile? tile, Piece? piece)
+            {
+                Tile = tile;
+                Piece = piece;
+            }
+        }
+
+        public Board(bool isPlayer)
+        {
+            bool dark = true;
             for (int y = 0; y < 10; y++)
             {
                 // So not every rank has the same color
-                _dark = !_dark;
+                dark = !dark;
 
                 for (int x = 0; x < 10; x++)
                 {
                     // Console.WriteLine($"Count: {y * 10 + x}");
-                    if (_dark)
-                        Tiles[y * 10 + x] = new Tile(x * sizeOfSquare, y * sizeOfSquare, sizeOfSquare, _dark);
+                    if (dark)
+                        Tiles[y * 10 + x] = new Tile(x * sizeOfSquare, y * sizeOfSquare, sizeOfSquare, dark);
                     else
-                        Tiles[y * 10 + x] = new Tile(x * sizeOfSquare, y * sizeOfSquare, sizeOfSquare, _dark);
+                        Tiles[y * 10 + x] = new Tile(x * sizeOfSquare, y * sizeOfSquare, sizeOfSquare, dark);
 
                     // So the next Tile has the opposite color
-                    _dark = !_dark;
+                    dark = !dark;
                 }
             }
+            _isPlayer = isPlayer;
         }
 
         public void Draw()
@@ -68,18 +83,32 @@ namespace Checkers.board
                 {
                     Console.WriteLine($"X: {tile.PositionOnBoard.X}, Y: {tile.PositionOnBoard.Y}");
 
-                    // if the tile contains a piece and the piece is of the same side as the player
+                    // if the tile contains a piece and the piece is of the same side as the player.
                     if (tile.Piece != null && tile.Piece.SideOfPiece.Equals(_sideOfPlayer))
                     {
-                        Console.WriteLine($"side of piece: {tile.Piece.SideOfPiece.ToString()}, side of player: {_sideOfPlayer.ToString()}");
                         // The piece is selected.
-                        _selectedPiece = tile.Piece;
+                        _selectedPosition = new(tile, tile.Piece);
 
                         // Will change color of all tiles on which the piece can move.
-                        _selectedPiece.CalculateLegalMoves(tile).ForEach(position =>
+                        _selectedPosition.Piece.CalculateLegalMoves(tile).ForEach(position =>
                         {
                             ScreenManager.Board.Tiles[position].Color = Color.VIOLET;
                         });
+                    }
+
+                    // If the player already selected a position and presses on a tile without a piece on it.
+                    else if(tile.Piece == null && _selectedPosition.Tile != null && _selectedPosition.Piece != null)
+                    {
+                        List<int> legalMoves = _selectedPosition.Piece.CalculateLegalMoves(_selectedPosition.Tile);
+
+                        // if the tile clicked is a legal move for the piece.
+                        if (legalMoves.Contains(tile.GetPositionInTilesArray()))
+                        {
+                            string message = _selectedPosition.Tile.GetPositionInTilesArray() + ":" + 
+                                typeof(Piece).ToString() + ':' + tile.GetPositionInTilesArray() + ';';
+
+                            Client.Send(message);
+                        }
                     }
                 }
             }
@@ -134,6 +163,37 @@ namespace Checkers.board
             }
             Console.WriteLine("side: " + _sideOfPlayer.ToString());
             HasInitialised = true;
+        }
+
+        // This method should only be used by the server to verify if the move is legal.
+        public void IsLegalMove(string message)
+        {
+            if (!_isPlayer)
+            {
+                (int, string, int) data = ParseMessage(message);
+                if (Tiles[data.Item1].Piece != null)
+                {
+                    Tile currentPosition = Tiles[data.Item1];
+
+                    List<int> legalMoves = currentPosition.Piece.CalculateLegalMoves(currentPosition);
+
+                }
+            }
+        }
+
+        private (int, string, int) ParseMessage(string message)
+        {
+            string[] data = message.Split(':');
+
+            int currentPosition = int.Parse(data[0]);
+
+            data[2] = data[2].Replace(';', ' ');
+            data[2] = data[2].Trim();
+
+            int futurePosition = int.Parse(data[2]);
+            string typeOfPiece = data[1];
+
+            return (currentPosition, typeOfPiece, futurePosition);
         }
     }
 }

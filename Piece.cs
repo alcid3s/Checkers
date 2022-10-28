@@ -37,12 +37,17 @@ namespace Checkers
         public List<int> CalculateLegalMoves(Tile currentPosition)
         {
             List<int> legalMoves = new();
+
             int? northEast = currentPosition.GetNorthEast();
             if(northEast != null)
-                legalMoves.Add(northEast.Value);
+                if(ScreenManager.Board.Tiles[(int)northEast].Piece == null)
+                    legalMoves.Add(northEast.Value);
+
             int? northWest = currentPosition.GetNorthWest();
             if (northWest != null)
-                legalMoves.Add(northWest.Value);
+                if (ScreenManager.Board.Tiles[(int)northWest].Piece == null)
+                    legalMoves.Add(northWest.Value);
+
             return legalMoves;
         }
     }

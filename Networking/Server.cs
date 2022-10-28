@@ -44,7 +44,7 @@ namespace Checkers.Networking
             _serverSocket.Listen(100);
 
             Console.WriteLine($"Server setup and running on {endPoint.Address}:{endPoint.Port}");
-            _board = new Board();
+            _board = new Board(false);
             _board.Init(Setup);
             _currentState = Setup;
         }
@@ -106,6 +106,11 @@ namespace Checkers.Networking
                     int receive = client.Socket.Receive(message);
                     string information = Encoding.UTF8.GetString(message, 0, receive);
 
+                    Console.WriteLine($"DATA FROM CLIENT: {information}");
+
+                    _board.IsLegalMove(){
+
+                    }
                     // TODO: Check if move player wants to do is legal.
                 }catch(Exception e)
                 {
