@@ -107,9 +107,12 @@ namespace Checkers.Networking
                     string information = Encoding.UTF8.GetString(message, 0, receive);
 
                     Console.WriteLine($"DATA FROM CLIENT: {information}");
+                    (int, string, int) data = ParseMessage(information);
 
-                    _board.IsLegalMove(){
-
+                    if (_board.IsLegalMove(data.Item1, data.Item2, data.Item3))
+                    {
+                        
+                        Console.WriteLine("LEGALMOVE");
                     }
                     // TODO: Check if move player wants to do is legal.
                 }catch(Exception e)
@@ -127,6 +130,21 @@ namespace Checkers.Networking
                 client.Socket.Send(Encoding.UTF8.GetBytes(_currentState + 'W'));
             else
                 client.Socket.Send(Encoding.UTF8.GetBytes(_currentState + 'B'));
+        }
+
+        private (int, string, int) ParseMessage(string message)
+        {
+            string[] data = message.Split(':');
+
+            int currentPosition = int.Parse(data[0]);
+
+            data[2] = data[2].Replace(';', ' ');
+            data[2] = data[2].Trim();
+
+            int futurePosition = int.Parse(data[2]);
+            string typeOfPiece = data[1];
+
+            return (currentPosition, typeOfPiece, futurePosition);
         }
     }
 }

@@ -166,34 +166,23 @@ namespace Checkers.board
         }
 
         // This method should only be used by the server to verify if the move is legal.
-        public void IsLegalMove(string message)
+        public bool IsLegalMove(int currentPosition, string typeOfPiece, int futurePosition)
         {
             if (!_isPlayer)
             {
-                (int, string, int) data = ParseMessage(message);
-                if (Tiles[data.Item1].Piece != null)
+                // Check if the place selected contains a piece on the board the server holds
+                if (Tiles[currentPosition].Piece != null)
                 {
-                    Tile currentPosition = Tiles[data.Item1];
+                    List<int> legalMoves = Tiles[currentPosition].Piece.CalculateLegalMoves(Tiles[currentPosition]);
 
-                    List<int> legalMoves = currentPosition.Piece.CalculateLegalMoves(currentPosition);
-
+                    // If the legalMoves are correct according to the server return true
+                    if (legalMoves.Contains(futurePosition))
+                    {
+                        return true;
+                    }
                 }
             }
-        }
-
-        private (int, string, int) ParseMessage(string message)
-        {
-            string[] data = message.Split(':');
-
-            int currentPosition = int.Parse(data[0]);
-
-            data[2] = data[2].Replace(';', ' ');
-            data[2] = data[2].Trim();
-
-            int futurePosition = int.Parse(data[2]);
-            string typeOfPiece = data[1];
-
-            return (currentPosition, typeOfPiece, futurePosition);
+            return false;
         }
     }
 }
