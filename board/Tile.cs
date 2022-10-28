@@ -41,7 +41,7 @@ namespace Checkers.board
             this.Piece = piece;
         }
 
-        public void Detach(Piece piece)
+        public void Detach()
         {
             this.Piece = null;
         }
@@ -70,16 +70,7 @@ namespace Checkers.board
         public Tile? GetNorthWest()
         {
             int bounds = GetPositionInTilesArray() - 11;
-            return bounds >= 0 && bounds <= 99 && !CheckTile(bounds) ? ScreenManager.Board.Tiles[bounds] : null;
-
-            //if(bounds >= 0 && bounds <= 99 && !CheckTile(bounds))
-            //{
-            //    return bounds;
-            //}
-            //else
-            //{
-            //    return null;
-            //}
+            return bounds >= 0 && bounds <= 99 && !CheckTile(bounds) ? bounds : null;
         }
 
         public Tile? GetNorthEast()

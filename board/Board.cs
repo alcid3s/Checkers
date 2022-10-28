@@ -11,6 +11,9 @@ namespace Checkers.board
 {
     public class Board
     {
+        // Used for when the server sends a message to the client.
+        public char GotReply { get; set; } = ' ';
+
         // bool and string are used so the server can send a FEN string to the client.
         public bool HasInitialised { get; private set; } = false;
         public string HasFen { get; set; } = string.Empty;
@@ -25,7 +28,7 @@ namespace Checkers.board
         private Piece.Side _sideOfPlayer;
         private SelectedPosition _selectedPosition;
 
-        private bool _isPlayer;
+        private readonly bool _isPlayer;
 
         struct SelectedPosition
         {
@@ -100,20 +103,65 @@ namespace Checkers.board
                     }
 
                     // If the player already selected a position and presses on a tile without a piece on it.
-                    else if(tile.Piece == null && _selectedPosition.Tile != null && _selectedPosition.Piece != null)
+                    else if (tile.Piece == null && _selectedPosition.Tile != null && _selectedPosition.Piece != null)
                     {
                         List<int> legalMoves = _selectedPosition.Piece.CalculateRegularMoves(_selectedPosition.Tile);
 
                         // if the tile clicked is a legal move for the piece.
                         if (legalMoves.Contains(tile.GetPositionInTilesArray()))
                         {
-                            string message = _selectedPosition.Tile.GetPositionInTilesArray() + ":" + 
-                                typeof(Piece).ToString() + ':' + tile.GetPositionInTilesArray() + ';';
+                            Console.WriteLine("It's a legalmove");
+                            new Thread(() =>
+                            {
+                                AwaitReplyFromServer(tile);
+                            }).Start();
 
-                            Client.Send(message);
+                            Console.WriteLine("Sending to server");
+                            _ = SendToServer(tile);
                         }
                     }
                 }
+            }
+        }
+
+        private void AwaitReplyFromServer(Tile tile)
+        {
+            while (GotReply.Equals(' ')) ;
+
+            if (GotReply.Equals('T'))
+            {
+                GotReply = ' ';
+
+                // They wont every be null but it removes all errors :)
+                if(_selectedPosition.Piece != null && _selectedPosition.Tile != null)
+                {
+                    Tiles[tile.GetPositionInTilesArray()].Attach(_selectedPosition.Piece);
+                    //tile.Attach(_selectedPosition.Piece);
+
+                    _selectedPosition.Tile.Detach();
+                   
+
+
+                    _selectedPosition = new(null, null);
+
+                    foreach(Tile t in Tiles)
+                    {
+                        t.ResetColor();
+                    }
+                }
+            }
+            else if (GotReply.Equals('F'))
+            {
+
+            }
+        }
+
+        private async Task SendToServer(Tile tile)
+        {
+            if (_selectedPosition.Tile != null)
+            {
+                string message = $"{_selectedPosition.Tile.GetPositionInTilesArray()}:{typeof(Piece)}:{tile.GetPositionInTilesArray()};";
+                await Client.Send(message);
             }
         }
 
@@ -145,7 +193,7 @@ namespace Checkers.board
                     }
                     else if (c.Equals(';'))
                         endOfFEN = true;
-                    else if(c == 'p' || c == 'P')
+                    else if (c == 'p' || c == 'P')
                     {
                         Piece piece = dict[c];
 
@@ -166,7 +214,6 @@ namespace Checkers.board
                     }
                 }
             }
-            Console.WriteLine("side: " + _sideOfPlayer.ToString());
             HasInitialised = true;
         }
 
@@ -175,11 +222,18 @@ namespace Checkers.board
         {
             if (!_isPlayer)
             {
+                Console.WriteLine($"SERVER: currentpos: {currentPosition} and containspiece = {Tiles[currentPosition].Piece != null}");
                 // Check if the place selected contains a piece on the board the server holds
                 if (Tiles[currentPosition].Piece != null)
                 {
+                    Console.WriteLine($"SERVER: checking if move is legal: {currentPosition}");
                     List<int> legalMoves = Tiles[currentPosition].Piece.CalculateRegularMoves(Tiles[currentPosition]);
 
+                    Console.WriteLine($"SERVER: SIZE OF LIST: {legalMoves.Count}");
+                    legalMoves.ForEach(m =>
+                    {
+                        Console.WriteLine("SERVER: M: " + m);
+                    });
                     // If the legalMoves are correct according to the server return true
                     if (legalMoves.Contains(futurePosition))
                     {

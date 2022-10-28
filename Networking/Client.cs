@@ -57,14 +57,20 @@ namespace Checkers.Networking
                         ScreenManager.Board.HasFen = response;
                         firstMessage = false;
                     }
+                    else
+                    {
+                        Console.WriteLine($"parsing: {response[0]}");
+                        ScreenManager.Board.GotReply = response[0];
+                    }
+                        
                 }
             }
         }
 
-        public static void Send(string message)
+        public static async Task Send(string message)
         {
             if(_socket != null)
-                _socket.Send(Encoding.UTF8.GetBytes(message));
+                _ = _socket.SendAsync(Encoding.UTF8.GetBytes(message), SocketFlags.Partial);
         }
     }
 }
