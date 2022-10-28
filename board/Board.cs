@@ -97,20 +97,26 @@ namespace Checkers.board
                     }
 
                     // If the player already selected a position and presses on a tile without a piece on it.
-                    else if(tile.Piece == null && _selectedPosition.Tile != null && _selectedPosition.Piece != null)
+                    else if (tile.Piece == null && _selectedPosition.Tile != null && _selectedPosition.Piece != null)
                     {
                         List<int> legalMoves = _selectedPosition.Piece.CalculateLegalMoves(_selectedPosition.Tile);
 
                         // if the tile clicked is a legal move for the piece.
                         if (legalMoves.Contains(tile.GetPositionInTilesArray()))
                         {
-                            string message = _selectedPosition.Tile.GetPositionInTilesArray() + ":" + 
-                                typeof(Piece).ToString() + ':' + tile.GetPositionInTilesArray() + ';';
-
-                            Client.Send(message);
+                            _ = SendToServer(tile);
                         }
                     }
                 }
+            }
+        }
+
+        private async Task SendToServer(Tile tile)
+        {
+            if(_selectedPosition.Tile != null)
+            {
+                string message = $"{_selectedPosition.Tile.GetPositionInTilesArray()}:{typeof(Piece).ToString()}:{tile.GetPositionInTilesArray()};";
+                await Client.Send(message);
             }
         }
 
@@ -140,7 +146,7 @@ namespace Checkers.board
                     }
                     else if (c.Equals(';'))
                         endOfFEN = true;
-                    else if(c == 'p' || c == 'P')
+                    else if (c == 'p' || c == 'P')
                     {
                         Piece piece = dict[c];
 

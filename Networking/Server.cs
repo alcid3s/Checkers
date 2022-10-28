@@ -109,18 +109,22 @@ namespace Checkers.Networking
                     Console.WriteLine($"DATA FROM CLIENT: {information}");
                     (int, string, int) data = ParseMessage(information);
 
+                    // TODO: Check if move player wants to do is legal.
                     if (_board.IsLegalMove(data.Item1, data.Item2, data.Item3))
                     {
-                        
-                        Console.WriteLine("LEGALMOVE");
+                        client.Socket.Send(Encoding.UTF8.GetBytes("T"));
                     }
-                    // TODO: Check if move player wants to do is legal.
+                    else
+                    {
+                        client.Socket.Send(Encoding.UTF8.GetBytes("F"));
+                    }
+                    
                 }catch(Exception e)
                 {
                     Console.WriteLine($"Server Got error with Client {client.PlayerId}:\n{e}");
                 }
             }
-
+            
             client.Socket.Close();
         }
 

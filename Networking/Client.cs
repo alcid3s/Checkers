@@ -61,10 +61,11 @@ namespace Checkers.Networking
             }
         }
 
-        public static void Send(string message)
+        public static async Task Send(string message)
         {
             if(_socket != null)
-                _socket.Send(Encoding.UTF8.GetBytes(message));
+                _ = _socket.SendAsync(Encoding.UTF8.GetBytes(message), SocketFlags.Partial);
+            
         }
     }
 }
