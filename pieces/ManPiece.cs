@@ -22,28 +22,27 @@ namespace Checkers.pieces
             {
                 throw new Exception("Error, Side is null");
             }
+
             Texture = LoadTextureFromImage(image);
             UnloadImage(image);
         }
 
         public override List<int> CalculateForcingMoves()
         {
-            Tile currentPosition = Tile();
-
-            if (currentPosition.Piece == null)
+            if (CurrentPosition.Piece == null)
                 return new List<int>();
 
             List<(Tile?, Tile?)> possibleDirections = new List<(Tile?, Tile?)>();
 
             if (SideOfPiece == Side.White)
             {
-                possibleDirections.Add((currentPosition.GetNorthEast(), currentPosition.GetNorthEast()?.GetNorthEast()));
-                possibleDirections.Add((currentPosition.GetNorthWest(), currentPosition.GetNorthWest()?.GetNorthWest()));
+                possibleDirections.Add((CurrentPosition.GetNorthEast(), CurrentPosition.GetNorthEast()?.GetNorthEast()));
+                possibleDirections.Add((CurrentPosition.GetNorthWest(), CurrentPosition.GetNorthWest()?.GetNorthWest()));
             }
             else
             {
-                possibleDirections.Add((currentPosition.GetSouthEast(), currentPosition.GetSouthEast()?.GetSouthEast()));
-                possibleDirections.Add((currentPosition.GetSouthWest(), currentPosition.GetSouthWest()?.GetSouthWest()));
+                possibleDirections.Add((CurrentPosition.GetSouthEast(), CurrentPosition.GetSouthEast()?.GetSouthEast()));
+                possibleDirections.Add((CurrentPosition.GetSouthWest(), CurrentPosition.GetSouthWest()?.GetSouthWest()));
             }
 
 #pragma warning disable CS8629
@@ -53,22 +52,20 @@ namespace Checkers.pieces
 
         public override List<int> CalculateRegularMoves()
         {
-            Tile currentPosition = Tile();
-
-            if (currentPosition.Piece == null)
+            if (CurrentPosition.Piece == null)
                 return new List<int>();
 
             List<Tile?> possibleDirections = new List<Tile?>();
 
             if (SideOfPiece == Side.White)
             {
-                possibleDirections.Add(currentPosition.GetNorthEast());
-                possibleDirections.Add(currentPosition.GetNorthWest());
+                possibleDirections.Add(CurrentPosition.GetNorthEast());
+                possibleDirections.Add(CurrentPosition.GetNorthWest());
             }
             else
             {
-                possibleDirections.Add(currentPosition.GetSouthEast());
-                possibleDirections.Add(currentPosition.GetSouthWest());
+                possibleDirections.Add(CurrentPosition.GetSouthEast());
+                possibleDirections.Add(CurrentPosition.GetSouthWest());
             }
 
 #pragma warning disable CS8602

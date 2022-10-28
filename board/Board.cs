@@ -155,10 +155,16 @@ namespace Checkers.board
                 // They wont every be null but it removes all errors :)
                 if(PositionSelected.Piece != null && PositionSelected.Tile != null)
                 {
-                    //Tiles[tile.GetPositionInTilesArray()].Attach(PositionSelected.Tile.Detach());
+                    Piece piece = PositionSelected.Tile.Detach();
+                    piece.CurrentPosition = Tiles[tile.GetPositionInTilesArray()];
+                    Tiles[tile.GetPositionInTilesArray()].Attach(piece);
+                    
+                    
+
+
                     //tile.Attach(_selectedPosition.Piece);
 
-                   
+
                     if (!_isPlayer)
                     {
                         Console.WriteLine($"SERVER: NEW POSITION FOR PIECE: {tile.GetPositionInTilesArray()}");
@@ -240,6 +246,15 @@ namespace Checkers.board
                     }
                 }
             }
+
+            foreach(Tile tile in Tiles)
+            {
+                if(tile.Piece != null)
+                {
+                    tile.Piece.CurrentPosition = tile;
+                }
+            }
+
             HasInitialised = true;
         }
 
@@ -254,7 +269,7 @@ namespace Checkers.board
                 // Check if the place selected contains a piece on the board the server holds
                 if (Tiles[currentPosition].Piece != null)
                 {
-                    Console.WriteLine("jjj:" + Tiles[currentPosition].Piece.Tile() == null);
+                    Console.WriteLine("jjj:" + Tiles[currentPosition].Piece.CurrentPosition == null);
                     List<int> legalMoves = Tiles[currentPosition].Piece.CalculateRegularMoves();
 
                     // If the legalMoves are correct according to the server return true

@@ -49,8 +49,8 @@ namespace Checkers.pieces
                 if (!piece.CalculateForcingMoves().Contains(position))
                     return false;
 
-                _board.Tiles[(position + piece.Tile().GetPositionInTilesArray()) / 2].Detach();
-                _board.Tiles[position].Attach(piece.Tile().Detach());
+                _board.Tiles[(position + piece.CurrentPosition.GetPositionInTilesArray()) / 2].Detach();
+                _board.Tiles[position].Attach(piece.CurrentPosition.Detach());
 
                 if (piece.CalculateForcingMoves().Count > 0)
                     LastCapturer = piece;
@@ -59,7 +59,7 @@ namespace Checkers.pieces
 
                 if (piece.GetType() == typeof(ManPiece))
                     if (position < 10 || position >= 90)
-                        piece.Tile().Attach(new KingPiece(piece.SideOfPiece));
+                        piece.CurrentPosition.Attach(new KingPiece(piece.SideOfPiece));
 
                 return true;
             }
@@ -67,12 +67,12 @@ namespace Checkers.pieces
             if (!piece.CalculateRegularMoves().Contains(position))
                 return false;
 
-            _board.Tiles[position].Attach(piece.Tile().Detach());
+            _board.Tiles[position].Attach(piece.CurrentPosition.Detach());
             ToggleTurns();
 
             if (piece.GetType() == typeof(ManPiece))
                 if (position < 10 || position >= 90)
-                    piece.Tile().Attach(new KingPiece(piece.SideOfPiece));
+                    piece.CurrentPosition.Attach(new KingPiece(piece.SideOfPiece));
 
             return true;
         }

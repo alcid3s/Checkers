@@ -9,6 +9,7 @@ namespace Checkers.pieces
     {
         public Texture2D Texture { get; protected set; }
         public Side SideOfPiece { get; private set; }
+        public Tile CurrentPosition { get; set; }
         public enum Side
         {
             White,
@@ -19,7 +20,7 @@ namespace Checkers.pieces
             SideOfPiece = side;
         }
 
-        public Tile Tile()
+        public Tile? Tile()
         {
             foreach(Tile tile in ScreenManager.Board.Tiles)
             {
