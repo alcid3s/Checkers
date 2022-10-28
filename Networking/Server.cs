@@ -118,7 +118,10 @@ namespace Checkers.Networking
 
         private void UpdateBoard(Client client)
         {
-            client.Socket.Send(Encoding.UTF8.GetBytes(_currentState + client.Side.ToString()));
+            if(client.Side.Equals(Piece.Side.White))
+                client.Socket.Send(Encoding.UTF8.GetBytes(_currentState + 'W'));
+            else
+                client.Socket.Send(Encoding.UTF8.GetBytes(_currentState + 'B'));
         }
     }
 }

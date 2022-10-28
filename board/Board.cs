@@ -20,6 +20,8 @@ namespace Checkers.board
 
         private Piece? _selectedPiece = null;
 
+        private Piece.Side _sideOfPlayer;
+
         public Board()
         {
             _dark = true;
@@ -60,20 +62,16 @@ namespace Checkers.board
 
         private void OnClick(Vector2 position)
         {
-            foreach(Tile tile in Tiles)
+            foreach (Tile tile in Tiles)
             {
                 if (tile.OnClick(position))
                 {
                     Console.WriteLine($"X: {tile.PositionOnBoard.X}, Y: {tile.PositionOnBoard.Y}");
 
-                    // if the tile contains a piece.
-                    if(tile.Piece != null)
+                    // if the tile contains a piece and the piece is of the same side as the player
+                    if (tile.Piece != null && tile.Piece.SideOfPiece.Equals(_sideOfPlayer))
                     {
-                        // the player hasn't selected a piece yet and the piece on the tile is the same as the color the player is playing as.
-                        if (_selectedPiece == null)
-                        {
-
-                        }
+                        Console.WriteLine($"side of piece: {tile.Piece.SideOfPiece.ToString()}, side of player: {_sideOfPlayer.ToString()}");
                         // The piece is selected.
                         _selectedPiece = tile.Piece;
 
@@ -83,7 +81,6 @@ namespace Checkers.board
                             ScreenManager.Board.Tiles[position].Color = Color.VIOLET;
                         });
                     }
-                        
                 }
             }
         }
@@ -99,7 +96,6 @@ namespace Checkers.board
 
             int x = 0, y = 0;
             bool endOfFEN = false;
-            string side = string.Empty;
             foreach (char c in fen)
             {
                 if (!endOfFEN)
@@ -115,7 +111,7 @@ namespace Checkers.board
                     }
                     else if (c.Equals(';'))
                         endOfFEN = true;
-                    else
+                    else if(c == 'p' || c == 'P')
                     {
                         Piece piece = dict[c];
 
@@ -126,11 +122,17 @@ namespace Checkers.board
                 }
                 else
                 {
-                    side += c;
+                    if (c == 'W')
+                    {
+                        _sideOfPlayer = Piece.Side.White;
+                    }
+                    else if (c == 'B')
+                    {
+                        _sideOfPlayer = Piece.Side.Black;
+                    }
                 }
             }
-
-            Console.WriteLine("side: " + side);
+            Console.WriteLine("side: " + _sideOfPlayer.ToString());
             HasInitialised = true;
         }
     }

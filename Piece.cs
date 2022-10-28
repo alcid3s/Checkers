@@ -16,7 +16,7 @@ namespace Checkers
         }
         public Piece(Side side)
         {
-            SideOfPiece = Side.White;
+            SideOfPiece = side;
             Image image = LoadImage("../../../res/Pieces.png");
             if (side == Side.White)
             {

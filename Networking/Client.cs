@@ -12,10 +12,10 @@ namespace Checkers.Networking
 {
     public class Client
     {
-        private short _port;
-        private IPAddress _address;
+        private readonly short _port;
+        private readonly IPAddress _address;
 
-        private Socket _socket;
+        private Socket? _socket;
 
         public Client(string ip, short port)
         {
@@ -45,15 +45,18 @@ namespace Checkers.Networking
             bool firstMessage = true;
             while (true)
             {
-                byte[] message = new byte[1024];
-                int receive = _socket.Receive(message);
-                string response = Encoding.UTF8.GetString(message);
-                Console.WriteLine($"Data received: {response}");
-
-                if (firstMessage)
+                if(_socket != null)
                 {
-                    ScreenManager.Board.HasFen = response;
-                    firstMessage = false;
+                    byte[] message = new byte[1024];
+                    _socket.Receive(message);
+                    string response = Encoding.UTF8.GetString(message);
+                    Console.WriteLine($"Data received: {response}");
+
+                    if (firstMessage)
+                    {
+                        ScreenManager.Board.HasFen = response;
+                        firstMessage = false;
+                    }
                 }
             }
         }
@@ -61,7 +64,8 @@ namespace Checkers.Networking
         public void Send(Vector2 posOfPiece, Vector2 newPosOfPiece)
         {
             string message = "" + posOfPiece.X + '-' + posOfPiece.Y + ':' + newPosOfPiece.X + '-' + newPosOfPiece;
-            _socket.Send(Encoding.UTF8.GetBytes(message));
+            if(_socket != null)
+                _socket.Send(Encoding.UTF8.GetBytes(message));
         }
     }
 }
