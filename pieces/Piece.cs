@@ -19,9 +19,19 @@ namespace Checkers.pieces
             SideOfPiece = side;
         }
 
-        public abstract List<int> CalculateForcingMoves(Tile currentPosition);
+        public Tile Tile()
+        {
+            foreach(Tile tile in ScreenManager.Board.Tiles)
+            {
+                if (tile.Piece == this)
+                    return tile;
+            }
+            return null;
+        } 
 
-        public abstract List<int> CalculateRegularMoves(Tile currentPosition);
+        public abstract List<int> CalculateForcingMoves();
+
+        public abstract List<int> CalculateRegularMoves();
 
         protected static bool CheckMove(Tile? target)
         {

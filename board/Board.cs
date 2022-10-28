@@ -90,27 +90,40 @@ namespace Checkers.board
                     Console.WriteLine($"X: {tile.PositionOnBoard.X}, Y: {tile.PositionOnBoard.Y}");
 
                     // if the tile contains a piece and the piece is of the same side as the player.
-                    if (tile.Piece != null && tile.Piece.SideOfPiece.Equals(_sideOfPlayer))
+                    if (tile.Piece != null && tile.Piece.SideOfPiece.Equals(_sideOfPlayer) && Manager.LegalPieces().Contains(tile.Piece))
                     {
                         // The piece is selected.
                         _selectedPosition = new(tile, tile.Piece);
 
                         // Will change color of all tiles on which the piece can move.
-                        _selectedPosition.Piece.CalculateRegularMoves(tile).ForEach(position =>
+                        foreach (Tile t in Tiles)
                         {
-                            ScreenManager.Board.Tiles[position].Color = Color.VIOLET;
-                        });
+                            t.ResetColor();
+                        }
+
+                        if (tile.Piece.CalculateForcingMoves(tile).Count > 0)
+                            tile.Piece.CalculateForcingMoves(tile).ForEach(position =>
+                            {
+                                ScreenManager.Board.Tiles[position].Color = Color.VIOLET;
+                            });
+                        else
+                            tile.Piece.CalculateRegularMoves(tile).ForEach(position =>
+                            {
+                                ScreenManager.Board.Tiles[position].Color = Color.VIOLET;
+                            });
                     }
 
                     // If the player already selected a position and presses on a tile without a piece on it.
                     else if (tile.Piece == null && _selectedPosition.Tile != null && _selectedPosition.Piece != null)
                     {
-                        List<int> legalMoves = _selectedPosition.Piece.CalculateRegularMoves(_selectedPosition.Tile);
+                        List<int> legalMoves = _selectedPosition.Piece.CalculateForcingMoves(_selectedPosition.Tile);
+                        if (legalMoves.Count == 0)
+                            legalMoves = _selectedPosition.Piece.CalculateRegularMoves(_selectedPosition.Tile);
 
                         // if the tile clicked is a legal move for the piece.
                         if (legalMoves.Contains(tile.GetPositionInTilesArray()))
                         {
-                            Console.WriteLine("It's a legalmove");
+                            Console.WriteLine("It's a legal move");
                             new Thread(() =>
                             {
                                 AwaitReplyFromServer(tile);
@@ -135,10 +148,9 @@ namespace Checkers.board
                 // They wont every be null but it removes all errors :)
                 if(_selectedPosition.Piece != null && _selectedPosition.Tile != null)
                 {
-                    Tiles[tile.GetPositionInTilesArray()].Attach(_selectedPosition.Piece);
+                    Tiles[tile.GetPositionInTilesArray()].Attach(_selectedPosition.Tile.Detach());
                     //tile.Attach(_selectedPosition.Piece);
 
-                    _selectedPosition.Tile.Detach();
                    
 
 

@@ -41,9 +41,11 @@ namespace Checkers.board
             this.Piece = piece;
         }
 
-        public void Detach()
+        public Piece Detach()
         {
+            Piece piece = this.Piece;
             this.Piece = null;
+            return piece;
         }
 
         public new void Draw()
