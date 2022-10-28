@@ -39,6 +39,7 @@ namespace Checkers.board
         public void Attach(Piece piece)
         {
             this.Piece = piece;
+            piece.CurrentPosition = this;
         }
 
         public Piece Detach()

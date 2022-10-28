@@ -155,9 +155,7 @@ namespace Checkers.board
                 // They wont every be null but it removes all errors :)
                 if(PositionSelected.Piece != null && PositionSelected.Tile != null)
                 {
-                    Piece piece = PositionSelected.Tile.Detach();
-                    piece.CurrentPosition = Tiles[tile.GetPositionInTilesArray()];
-                    Tiles[tile.GetPositionInTilesArray()].Attach(piece);
+                    Tiles[tile.GetPositionInTilesArray()].Attach(PositionSelected.Tile.Detach());
                     
                     //tile.Attach(_selectedPosition.Piece);
 

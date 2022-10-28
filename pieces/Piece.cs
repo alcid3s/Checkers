@@ -20,16 +20,6 @@ namespace Checkers.pieces
             SideOfPiece = side;
         }
 
-        public Tile? Tile()
-        {
-            foreach(Tile tile in ScreenManager.Board.Tiles)
-            {
-                if (tile.Piece == this)
-                    return tile;
-            }
-            return null;
-        } 
-
         public abstract List<int> CalculateForcingMoves();
 
         public abstract List<int> CalculateRegularMoves();

@@ -10,7 +10,7 @@ namespace Checkers.pieces
     public class PieceManager
     {
         private Board _board;
-        public Piece.Side WhoseTurn { get; set; }
+        public Piece.Side WhoseTurn { get; private set; }
         public Piece? LastCapturer { get; set; } = null;
 
         public PieceManager(Board board)
