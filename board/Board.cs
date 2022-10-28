@@ -159,9 +159,6 @@ namespace Checkers.board
                     piece.CurrentPosition = Tiles[tile.GetPositionInTilesArray()];
                     Tiles[tile.GetPositionInTilesArray()].Attach(piece);
                     
-                    
-
-
                     //tile.Attach(_selectedPosition.Piece);
 
 
