@@ -48,7 +48,6 @@ namespace Checkers.Screens
             {
                 case ScreenState.MainScreenState:
                     _mainScreen.Update();
-                    Console.WriteLine("lol");
                     break;
                 case ScreenState.HostOrJoinState:
                     _hostOrJoinScreen.Update();

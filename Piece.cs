@@ -1,22 +1,24 @@
-﻿using Raylib_cs;
+﻿using Checkers.board;
+using Checkers.Screens;
+using Raylib_cs;
 using static Raylib_cs.Raylib;
 
 namespace Checkers
 {
-
     public class Piece
     {
         public Texture2D Texture { get; private set; }
+        public Side SideOfPiece { get; private set; }
         public enum Side
         {
-            Red,
+            White,
             Black
         }
-
         public Piece(Side side)
         {
+            SideOfPiece = Side.White;
             Image image = LoadImage("../../../res/Pieces.png");
-            if (side == Side.Red)
+            if (side == Side.White)
             {
                 ImageCrop(ref image, new Rectangle(96, 0, 192, 96));
             }
@@ -30,6 +32,18 @@ namespace Checkers
             }
             this.Texture = LoadTextureFromImage(image);
             UnloadImage(image);
+        }
+
+        public List<int> CalculateLegalMoves(Tile currentPosition)
+        {
+            List<int> legalMoves = new();
+            int? northEast = currentPosition.GetNorthEast();
+            if(northEast != null)
+                legalMoves.Add(northEast.Value);
+            int? northWest = currentPosition.GetNorthWest();
+            if (northWest != null)
+                legalMoves.Add(northWest.Value);
+            return legalMoves;
         }
     }
 }

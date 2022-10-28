@@ -22,12 +22,14 @@ namespace Checkers.Networking
         private string _currentState = string.Empty;
         private struct Client
         {
+            public Piece.Side Side { get; private set; }
             public Socket Socket { get; }
             public byte PlayerId { get; }
-            public Client(Socket socket, byte player)
+            public Client(Socket socket, byte player, Piece.Side side)
             {
                 Socket = socket;
                 PlayerId = player;
+                Side = side;
             }
         }
 
@@ -59,16 +61,32 @@ namespace Checkers.Networking
                     if (_serverSocket != null)
                         socket = _serverSocket.Accept();
 
-                    // saving client to list.
-                    Client client = new(socket, amountOfPlayersActive);
-                    _clientList[amountOfPlayersActive] = client;
-                    amountOfPlayersActive++;
+                    // Used to decide who plays as who.
+                    bool whiteIsTaken = false;
+                    if (_clientList.Length == 1)
+                        whiteIsTaken = true;
 
-                    // Every client gets its own thread.
-                    new Thread(() =>
+                    // saving client to list if the socket of the client is not null.
+                    if(socket != null)
                     {
-                        HandleClient(client);
-                    }).Start();
+                        // decides which side the player plays as.
+                        Piece.Side side;
+                        if (whiteIsTaken)
+                            side = Piece.Side.Black;
+                        else
+                            side = Piece.Side.White;
+
+                        Client client = new(socket, amountOfPlayersActive, side);
+                        _clientList[amountOfPlayersActive] = client;
+                        amountOfPlayersActive++;
+
+                        // Every client gets its own thread.
+                        new Thread(() =>
+                        {
+                            HandleClient(client);
+                        }).Start();
+                    }
+
                 }
             }).Start();
         }
@@ -100,7 +118,7 @@ namespace Checkers.Networking
 
         private void UpdateBoard(Client client)
         {
-            client.Socket.Send(Encoding.UTF8.GetBytes(_currentState));
+            client.Socket.Send(Encoding.UTF8.GetBytes(_currentState + client.Side.ToString()));
         }
     }
 }

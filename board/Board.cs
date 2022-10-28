@@ -1,20 +1,24 @@
 ﻿using Raylib_cs;
 using static Raylib_cs.Raylib;
-using static Raylib_cs.Color;
 using System.Numerics;
 using Checkers.graphics;
+using Checkers.Screens;
 
 namespace Checkers.board
 {
     public class Board
     {
+        // bool and string are used so the server can send a FEN string to the client.
         public bool HasInitialised { get; private set; } = false;
         public string HasFen { get; set; } = string.Empty;
 
-        private Tile[] _tiles = new Tile[100];
+        // Used to create the board.
+        public Tile[] Tiles { get; private set; } = new Tile[100];
         private bool _dark;
 
         private const int sizeOfSquare = 96;
+
+        private Piece? _selectedPiece = null;
 
         public Board()
         {
@@ -28,9 +32,9 @@ namespace Checkers.board
                 {
                     // Console.WriteLine($"Count: {y * 10 + x}");
                     if (_dark)
-                        _tiles[y * 10 + x] = new Tile(x * sizeOfSquare, y * sizeOfSquare, sizeOfSquare, _dark);
+                        Tiles[y * 10 + x] = new Tile(x * sizeOfSquare, y * sizeOfSquare, sizeOfSquare, _dark);
                     else
-                        _tiles[y * 10 + x] = new Tile(x * sizeOfSquare, y * sizeOfSquare, sizeOfSquare, _dark);
+                        Tiles[y * 10 + x] = new Tile(x * sizeOfSquare, y * sizeOfSquare, sizeOfSquare, _dark);
 
                     // So the next Tile has the opposite color
                     _dark = !_dark;
@@ -40,7 +44,7 @@ namespace Checkers.board
 
         public void Draw()
         {
-            foreach (Tile tile in _tiles)
+            foreach (Tile tile in Tiles)
             {
                 tile.Draw();
             }
@@ -56,13 +60,30 @@ namespace Checkers.board
 
         private void OnClick(Vector2 position)
         {
-            foreach(Tile tile in _tiles)
+            foreach(Tile tile in Tiles)
             {
                 if (tile.OnClick(position))
                 {
                     Console.WriteLine($"X: {tile.PositionOnBoard.X}, Y: {tile.PositionOnBoard.Y}");
+
+                    // if the tile contains a piece.
                     if(tile.Piece != null)
-                        Console.WriteLine("Contains piece");
+                    {
+                        // the player hasn't selected a piece yet and the piece on the tile is the same as the color the player is playing as.
+                        if (_selectedPiece == null)
+                        {
+
+                        }
+                        // The piece is selected.
+                        _selectedPiece = tile.Piece;
+
+                        // Will change color of all tiles on which the piece can move.
+                        _selectedPiece.CalculateLegalMoves(tile).ForEach(position =>
+                        {
+                            ScreenManager.Board.Tiles[position].Color = Color.VIOLET;
+                        });
+                    }
+                        
                 }
             }
         }
@@ -72,33 +93,44 @@ namespace Checkers.board
             Console.WriteLine($"FEN: {fen}");
             var dict = new Dictionary<char, Piece>()
             {
-                ['P'] = new Piece(Piece.Side.Red),
+                ['P'] = new Piece(Piece.Side.White),
                 ['p'] = new Piece(Piece.Side.Black)
             };
 
             int x = 0, y = 0;
+            bool endOfFEN = false;
+            string side = string.Empty;
             foreach (char c in fen)
             {
-                if (c == '/')
+                if (!endOfFEN)
                 {
-                    x = 0;
-                    y++;
+                    if (c == '/')
+                    {
+                        x = 0;
+                        y++;
+                    }
+                    else if (char.IsDigit(c))
+                    {
+                        x += (int)Char.GetNumericValue(c);
+                    }
+                    else if (c.Equals(';'))
+                        endOfFEN = true;
+                    else
+                    {
+                        Piece piece = dict[c];
+
+                        // Gets tile on which a piece needs to spawn.
+                        Tiles[(y * 10) + x].Attach(piece);
+                        x++;
+                    }
                 }
-                else if (char.IsDigit(c))
-                {
-                    x += (int)Char.GetNumericValue(c);
-                }
-                else if (c.Equals(';'))
-                    break;
                 else
                 {
-                    Piece piece = dict[c];
-
-                    // Gets tile on which a piece needs to spawn.
-                    _tiles[(y * 10) + x].Attach(piece);
-                    x++;
+                    side += c;
                 }
             }
+
+            Console.WriteLine("side: " + side);
             HasInitialised = true;
         }
     }
