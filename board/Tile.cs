@@ -70,7 +70,7 @@ namespace Checkers.board
         public Tile? GetNorthWest()
         {
             int bounds = GetPositionInTilesArray() - 11;
-            return bounds >= 0 && bounds <= 99 && !CheckTile(bounds) ? bounds : null;
+            return bounds >= 0 && bounds <= 99 && !CheckTile(bounds) ? ScreenManager.Board.Tiles[bounds] : null;
         }
 
         public Tile? GetNorthEast()

@@ -50,7 +50,7 @@ namespace Checkers.Networking
                     byte[] message = new byte[1024];
                     _socket.Receive(message);
                     string response = Encoding.UTF8.GetString(message);
-                    Console.WriteLine($"Data received: {response}");
+                    Console.WriteLine($"CLIENT: Data received: {response}");
 
                     if (firstMessage)
                     {
@@ -59,10 +59,15 @@ namespace Checkers.Networking
                     }
                     else
                     {
-                        Console.WriteLine($"parsing: {response[0]}");
-                        ScreenManager.Board.GotReply = response[0];
+                        if (response.Contains("T"))
+                        {
+                            ScreenManager.Board.GotReply = true;
+                        }
+                        else if(response.Contains("F"))
+                        {
+                            ScreenManager.Board.GotReply = false;
+                        }
                     }
-                        
                 }
             }
         }
