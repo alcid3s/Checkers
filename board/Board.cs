@@ -109,6 +109,7 @@ namespace Checkers.board
                         else
                             tile.Piece.CalculateRegularMoves().ForEach(position =>
                             {
+                                Console.WriteLine(position);
                                 ScreenManager.Board.Tiles[position].Color = Color.VIOLET;
                             });
                     }
@@ -182,16 +183,18 @@ namespace Checkers.board
             Manager = new PieceManager(this);
 
             Console.WriteLine($"FEN: {fen}");
-            var dict = new Dictionary<char, Piece>()
-            {
-                ['P'] = new ManPiece(Piece.Side.White),
-                ['p'] = new ManPiece(Piece.Side.Black)
-            };
+            
 
             int x = 0, y = 0;
             bool endOfFEN = false;
             foreach (char c in fen)
             {
+                var dict = new Dictionary<char, Piece>()
+                {
+                    ['P'] = new ManPiece(Piece.Side.White),
+                    ['p'] = new ManPiece(Piece.Side.Black)
+                };
+
                 if (!endOfFEN)
                 {
                     if (c == '/')
@@ -232,6 +235,7 @@ namespace Checkers.board
         // This method should only be used by the server to verify if the move is legal.
         public bool IsLegalMove(int currentPosition, string typeOfPiece, int futurePosition)
         {
+            /*
             if (!_isPlayer)
             {
                 Console.WriteLine($"SERVER: currentpos: {currentPosition} and containspiece = {Tiles[currentPosition].Piece != null}");
@@ -252,8 +256,9 @@ namespace Checkers.board
                         return true;
                     }
                 }
-            }
+            }*/
             return false;
+            
         }
     }
 }
