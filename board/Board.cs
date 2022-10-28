@@ -18,6 +18,8 @@ namespace Checkers.board
         // Used to create the board.
         public Tile[] Tiles { get; private set; } = new Tile[100];
 
+        public PieceManager Manager { get; private set; }
+
         private const int sizeOfSquare = 96;
 
         private Piece.Side _sideOfPlayer;
@@ -117,6 +119,8 @@ namespace Checkers.board
 
         public void Init(string fen)
         {
+            Manager = new PieceManager(this);
+
             Console.WriteLine($"FEN: {fen}");
             var dict = new Dictionary<char, Piece>()
             {
