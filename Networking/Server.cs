@@ -70,7 +70,7 @@ namespace Checkers.Networking
                         whiteIsTaken = true;
 
                     // saving client to list if the socket of the client is not null.
-                    if(socket != null)
+                    if (socket != null)
                     {
                         // decides which side the player plays as.
                         Piece.Side side;
@@ -89,7 +89,6 @@ namespace Checkers.Networking
                             HandleClient(client);
                         }).Start();
                     }
-
                 }
             }).Start();
         }
@@ -110,47 +109,61 @@ namespace Checkers.Networking
                     string information = Encoding.UTF8.GetString(message, 0, receive);
 
                     // If the player who has the turn also makes a move
-                    //if (client.Side.Equals(_whoHasTurn))
-                    //{
-                        Console.WriteLine($"DATA FROM CLIENT: {information}");
-                        (int, string, int) data = ParseMessage(information);
+                    //if (client.Side.Equals(_whoHasTurn))        //{
+                    Console.WriteLine($"DATA FROM CLIENT: {information}");
+            
+                    (int, string, int) data = ParseMessage(information);
 
-                        //Check if move player wants to do is legal.
-                        if (_board.IsLegalMove(data.Item1, data.Item2, data.Item3))
+                    //Check if move player wants to do is legal.
+                    if (_board.IsLegalMove(data.Item1, data.Item2, data.Item3))
+                    {
+                        _board.PositionSelected = new(_board.Tiles[data.Item1], _board.Tiles[data.Item1].Piece);
+
+                        // This thread makes sure the piece also gets moved on the board the server holds.
+                        new Thread(() =>
                         {
-                            client.Socket.Send(Encoding.UTF8.GetBytes("T"));
-                            _board.GotReply = 'T';
-                            foreach (Client c in _clientList)
+                            _board.AwaitReplyFromServer(_board.Tiles[data.Item3]);
+                        }).Start();
+
+                        // The move was legal so this updates the board for server and client that sended the information.
+                        client.Socket.Send(Encoding.UTF8.GetBytes("T"));
+                        _board.GotReply = true;
+
+                        foreach (Client c in _clientList)
+                        {
+                            // Send the newly made moves to the other client
+                            if (!c.Side.Equals(_whoHasTurn))
                             {
-                                // Send the newly made moves to the other client
-                                if (!c.Side.Equals(_whoHasTurn))
-                                {
-                                    client.Socket.Send(Encoding.UTF8.GetBytes(information));
-                                }
+                                client.Socket.Send(Encoding.UTF8.GetBytes(information));
                             }
+                        }
 
-                            if (_whoHasTurn.Equals(Piece.Side.White))
-                                _whoHasTurn = Piece.Side.Black;
-                            else if (_whoHasTurn.Equals(Piece.Side.Black))
-                                _whoHasTurn = Piece.Side.White;
-                        }
-                        else
-                        {
-                            client.Socket.Send(Encoding.UTF8.GetBytes("F"));
-                        }
+                        information = string.Empty;
+
+                        // Change turn to other party.
+                        if (_whoHasTurn.Equals(Piece.Side.White))
+                            _whoHasTurn = Piece.Side.Black;
+                        else if (_whoHasTurn.Equals(Piece.Side.Black))
+                            _whoHasTurn = Piece.Side.White;
+                    }
+                    else
+                    {
+                        client.Socket.Send(Encoding.UTF8.GetBytes("F"));
+                    }
                     //}
-                }catch(Exception e)
+                }
+                catch (Exception e)
                 {
                     Console.WriteLine($"Server Got error with Client {client.PlayerId}:\n{e}");
                 }
             }
-            
+
             client.Socket.Close();
         }
-        
+
         private void SendBasicData(Client client)
         {
-            if(client.Side.Equals(Piece.Side.White))
+            if (client.Side.Equals(Piece.Side.White))
                 client.Socket.Send(Encoding.UTF8.GetBytes(_currentState + 'W'));
             else
                 client.Socket.Send(Encoding.UTF8.GetBytes(_currentState + 'B'));

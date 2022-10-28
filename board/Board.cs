@@ -1,18 +1,16 @@
-﻿using Raylib_cs;
-using static Raylib_cs.Raylib;
-using System.Numerics;
-using Checkers.graphics;
-using Checkers.Screens;
-using Checkers.Networking;
-using System.Text;
+﻿using Checkers.Networking;
 using Checkers.pieces;
+using Checkers.Screens;
+using Raylib_cs;
+using System.Numerics;
+using static Raylib_cs.Raylib;
 
 namespace Checkers.board
 {
     public class Board
     {
         // Used for when the server sends a message to the client.
-        public char GotReply { get; set; } = ' ';
+        public bool GotReply { get; set; } = false;
 
         // bool and string are used so the server can send a FEN string to the client.
         public bool HasInitialised { get; private set; } = false;
@@ -26,11 +24,11 @@ namespace Checkers.board
         private const int sizeOfSquare = 96;
 
         private Piece.Side _sideOfPlayer;
-        private SelectedPosition _selectedPosition;
+        public SelectedPosition PositionSelected { get; set; }
 
         private readonly bool _isPlayer;
 
-        struct SelectedPosition
+        public struct SelectedPosition
         {
             public Tile? Tile { get; set; }
             public Piece? Piece { get; set; }
@@ -93,7 +91,7 @@ namespace Checkers.board
                     if (tile.Piece != null && tile.Piece.SideOfPiece.Equals(_sideOfPlayer) && Manager.LegalPieces().Contains(tile.Piece))
                     {
                         // The piece is selected.
-                        _selectedPosition = new(tile, tile.Piece);
+                        PositionSelected = new(tile, tile.Piece);
 
                         // Will change color of all tiles on which the piece can move.
                         foreach (Tile t in Tiles)
@@ -115,22 +113,20 @@ namespace Checkers.board
                     }
 
                     // If the player already selected a position and presses on a tile without a piece on it.
-                    else if (tile.Piece == null && _selectedPosition.Tile != null && _selectedPosition.Piece != null)
+                    else if (tile.Piece == null && PositionSelected.Tile != null && PositionSelected.Piece != null)
                     {
-                        List<int> legalMoves = _selectedPosition.Piece.CalculateForcingMoves();
+                        List<int> legalMoves = PositionSelected.Piece.CalculateRegularMoves(PositionSelected.Tile);
                         if (legalMoves.Count == 0)
                             legalMoves = _selectedPosition.Piece.CalculateRegularMoves();
 
                         // if the tile clicked is a legal move for the piece.
                         if (legalMoves.Contains(tile.GetPositionInTilesArray()))
                         {
-                            Console.WriteLine("It's a legal move");
                             new Thread(() =>
                             {
                                 AwaitReplyFromServer(tile);
                             }).Start();
 
-                            Console.WriteLine("Sending to server");
                             _ = SendToServer(tile);
                         }
                     }
@@ -138,42 +134,57 @@ namespace Checkers.board
             }
         }
 
-        private void AwaitReplyFromServer(Tile tile)
+        // Is public because server also needs to run this on another thread.
+        public void AwaitReplyFromServer(Tile tile)
         {
-            while (GotReply.Equals(' ')) ;
+            if(_isPlayer)
+                Console.WriteLine("CLIENT: Awaiting change in board");
 
-            if (GotReply.Equals('T'))
+            while (!GotReply) ;
+
+            if(_isPlayer)
+                Console.WriteLine($"CLIENT: GOTREPLY IS NOW {GotReply}");
+
+            if (GotReply)
             {
-                GotReply = ' ';
+                if(_isPlayer)
+                    Console.WriteLine("CLIENT: GOTREPLY IS NOW STILL T");
+
+                GotReply = false;
 
                 // They wont every be null but it removes all errors :)
-                if(_selectedPosition.Piece != null && _selectedPosition.Tile != null)
+                if(PositionSelected.Piece != null && PositionSelected.Tile != null)
                 {
                     Tiles[tile.GetPositionInTilesArray()].Attach(_selectedPosition.Tile.Detach());
                     //tile.Attach(_selectedPosition.Piece);
 
                    
+                    if (!_isPlayer)
+                    {
+                        Console.WriteLine($"SERVER: NEW POSITION FOR PIECE: {tile.GetPositionInTilesArray()}");
+                    }
 
-
-                    _selectedPosition = new(null, null);
+                    if (_isPlayer)
+                    {
+                        Console.WriteLine($"CLIENT: NEW POS = {tile.GetPositionInTilesArray()}");
+                    }
+                    PositionSelected = new(null, null);
 
                     foreach(Tile t in Tiles)
                     {
                         t.ResetColor();
                     }
                 }
-            }
-            else if (GotReply.Equals('F'))
-            {
-
+                if(!_isPlayer)
+                    Console.WriteLine("------------------------------");
             }
         }
 
         private async Task SendToServer(Tile tile)
         {
-            if (_selectedPosition.Tile != null)
+            if (PositionSelected.Tile != null)
             {
-                string message = $"{_selectedPosition.Tile.GetPositionInTilesArray()}:{typeof(Piece)}:{tile.GetPositionInTilesArray()};";
+                string message = $"{PositionSelected.Tile.GetPositionInTilesArray()}:{typeof(Piece)}:{tile.GetPositionInTilesArray()};";
                 await Client.Send(message);
             }
         }
@@ -239,17 +250,12 @@ namespace Checkers.board
             if (!_isPlayer)
             {
                 Console.WriteLine($"SERVER: currentpos: {currentPosition} and containspiece = {Tiles[currentPosition].Piece != null}");
+
                 // Check if the place selected contains a piece on the board the server holds
                 if (Tiles[currentPosition].Piece != null)
                 {
-                    Console.WriteLine($"SERVER: checking if move is legal: {currentPosition}");
-                    List<int> legalMoves = Tiles[currentPosition].Piece.CalculateRegularMoves();
+                    List<int> legalMoves = Tiles[currentPosition].Piece.CalculateRegularMoves(Tiles[currentPosition]);
 
-                    Console.WriteLine($"SERVER: SIZE OF LIST: {legalMoves.Count}");
-                    legalMoves.ForEach(m =>
-                    {
-                        Console.WriteLine("SERVER: M: " + m);
-                    });
                     // If the legalMoves are correct according to the server return true
                     if (legalMoves.Contains(futurePosition))
                     {
