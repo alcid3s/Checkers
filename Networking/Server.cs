@@ -109,8 +109,8 @@ namespace Checkers.Networking
                     string information = Encoding.UTF8.GetString(message, 0, receive);
 
                     // If the player who has the turn also makes a move
-                    if (client.Side.Equals(_whoHasTurn))
-                    {
+                    //if (client.Side.Equals(_whoHasTurn))
+                    //{
                         Console.WriteLine($"DATA FROM CLIENT: {information}");
                         (int, string, int) data = ParseMessage(information);
 
@@ -137,7 +137,7 @@ namespace Checkers.Networking
                         {
                             client.Socket.Send(Encoding.UTF8.GetBytes("F"));
                         }
-                    }
+                    //}
                 }catch(Exception e)
                 {
                     Console.WriteLine($"Server Got error with Client {client.PlayerId}:\n{e}");

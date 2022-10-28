@@ -27,7 +27,6 @@ namespace Checkers.board
 
         private readonly bool _isPlayer;
 
-
         struct SelectedPosition
         {
             public Tile? Tile { get; set; }
@@ -108,11 +107,13 @@ namespace Checkers.board
                         // if the tile clicked is a legal move for the piece.
                         if (legalMoves.Contains(tile.GetPositionInTilesArray()))
                         {
+                            Console.WriteLine("It's a legalmove");
                             new Thread(() =>
                             {
                                 AwaitReplyFromServer(tile);
                             }).Start();
 
+                            Console.WriteLine("Sending to server");
                             _ = SendToServer(tile);
                         }
                     }
@@ -131,9 +132,12 @@ namespace Checkers.board
                 // They wont every be null but it removes all errors :)
                 if(_selectedPosition.Piece != null && _selectedPosition.Tile != null)
                 {
-                    tile.Attach(_selectedPosition.Piece);
+                    Tiles[tile.GetPositionInTilesArray()].Attach(_selectedPosition.Piece);
+                    //tile.Attach(_selectedPosition.Piece);
 
                     _selectedPosition.Tile.Detach();
+                   
+
 
                     _selectedPosition = new(null, null);
 
@@ -213,11 +217,18 @@ namespace Checkers.board
         {
             if (!_isPlayer)
             {
+                Console.WriteLine($"SERVER: currentpos: {currentPosition} and containspiece = {Tiles[currentPosition].Piece != null}");
                 // Check if the place selected contains a piece on the board the server holds
                 if (Tiles[currentPosition].Piece != null)
                 {
+                    Console.WriteLine($"SERVER: checking if move is legal: {currentPosition}");
                     List<int> legalMoves = Tiles[currentPosition].Piece.CalculateLegalMoves(Tiles[currentPosition]);
 
+                    Console.WriteLine($"SERVER: SIZE OF LIST: {legalMoves.Count}");
+                    legalMoves.ForEach(m =>
+                    {
+                        Console.WriteLine("SERVER: M: " + m);
+                    });
                     // If the legalMoves are correct according to the server return true
                     if (legalMoves.Contains(futurePosition))
                     {
