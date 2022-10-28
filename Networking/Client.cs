@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Checkers.Screens;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -41,11 +42,19 @@ namespace Checkers.Networking
 
         private void Listen()
         {
+            bool firstMessage = true;
             while (true)
             {
                 byte[] message = new byte[1024];
                 int receive = _socket.Receive(message);
-                Console.WriteLine("Data received");
+                string response = Encoding.UTF8.GetString(message);
+                Console.WriteLine($"Data received: {response}");
+
+                if (firstMessage)
+                {
+                    ScreenManager.Board.HasFen = response;
+                    firstMessage = false;
+                }
             }
         }
 

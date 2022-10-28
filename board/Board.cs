@@ -8,6 +8,9 @@ namespace Checkers.board
 {
     public class Board
     {
+        public bool HasInitialised { get; private set; } = false;
+        public string HasFen { get; set; } = string.Empty;
+
         private Tile[] _tiles = new Tile[100];
         private bool _dark;
 
@@ -58,6 +61,8 @@ namespace Checkers.board
                 if (tile.OnClick(position))
                 {
                     Console.WriteLine($"X: {tile.PositionOnBoard.X}, Y: {tile.PositionOnBoard.Y}");
+                    if(tile.Piece != null)
+                        Console.WriteLine("Contains piece");
                 }
             }
         }
@@ -83,6 +88,8 @@ namespace Checkers.board
                 {
                     x += (int)Char.GetNumericValue(c);
                 }
+                else if (c.Equals(';'))
+                    break;
                 else
                 {
                     Piece piece = dict[c];
@@ -92,6 +99,7 @@ namespace Checkers.board
                     x++;
                 }
             }
+            HasInitialised = true;
         }
     }
 }

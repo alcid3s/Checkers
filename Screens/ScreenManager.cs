@@ -14,7 +14,8 @@ namespace Checkers.Screens
 {
     internal class ScreenManager : Screen
     {
-        public enum ScreenState {
+        public enum ScreenState
+        {
             MainScreenState,
             HostOrJoinState,
             HostState,
@@ -23,22 +24,58 @@ namespace Checkers.Screens
             PlayStateWithServer
         }
 
-        public static string Setup = "1p1p1p1p1p/p1p1p1p1p1/1p1p1p1p1p/p1p1p1p1p1/10/10/1P1P1P1P1P/P1P1P1P1P1/1P1P1P1P1P/P1P1P1P1P1";
-
         public static ScreenState State = ScreenState.MainScreenState;
+        public static Board Board = new();
+
         private Color _backGround;
 
         private MainScreen _mainScreen = new(Color.LIME);
         private HostOrJoinScreen _hostOrJoinScreen = new();
-        private Board _board = new();
-        private Server _server;
+
+
+        private Server? _server = null;
+        private Client? _client = null;
 
         private bool _firstTimeRunBoard = true;
-        
+
         public ScreenManager(Color backGround)
         {
             _backGround = backGround;
-            _board.Init(Setup);
+        }
+        public override void Update()
+        {
+            switch (State)
+            {
+                case ScreenState.MainScreenState:
+                    _mainScreen.Update();
+                    Console.WriteLine("lol");
+                    break;
+                case ScreenState.HostOrJoinState:
+                    _hostOrJoinScreen.Update();
+                    break;
+                case ScreenState.HostState:
+                    break;
+                case ScreenState.JoinState:
+                    break;
+                case ScreenState.PlayState:
+                    Board.Update();
+                    break;
+                case ScreenState.PlayStateWithServer:
+                    if (_firstTimeRunBoard)
+                    {
+                        _server = new Server(1337);
+                        _server.Run();
+                        _firstTimeRunBoard = false;
+                        _client = new Client("127.0.0.1", 1337);
+                        _client.Connect();
+                        _firstTimeRunBoard = false;
+                    }
+                    else if (Board.HasFen != string.Empty && !Board.HasInitialised)
+                        Board.Init(Board.HasFen);
+                    else if (Board.HasInitialised)
+                        Board.Update();
+                    break;
+            }
         }
 
         public override void Draw()
@@ -61,40 +98,12 @@ namespace Checkers.Screens
                     break;
                 case ScreenState.PlayState:
                     ClearBackground(_backGround);
-                    _board.Draw();
+                    Board.Draw();
                     break;
                 case ScreenState.PlayStateWithServer:
                     ClearBackground(_backGround);
-                    _board.Draw();
-                    break;
-            }
-        }
-
-        public override void Update()
-        { 
-            switch (State)
-            {
-                case ScreenState.MainScreenState:
-                    _mainScreen.Update();
-                    break;
-                case ScreenState.HostOrJoinState:
-                    _hostOrJoinScreen.Update();
-                    break;
-                case ScreenState.HostState:
-                    break;
-                case ScreenState.JoinState:
-                    break;
-                case ScreenState.PlayState:
-                    _board.Update();
-                    break;
-                case ScreenState.PlayStateWithServer:
-                    if (_firstTimeRunBoard)
-                    {
-                        _server = new Server(1337);
-                        _server.Run();
-                        _firstTimeRunBoard = false;
-                    }
-                    _board.Update();
+                    if(Board.HasInitialised)
+                        Board.Draw();
                     break;
             }
         }

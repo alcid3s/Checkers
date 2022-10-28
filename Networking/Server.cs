@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Checkers.board;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -10,15 +11,20 @@ namespace Checkers.Networking
 {
     public class Server
     {
+        public static string Setup = "1p1p1p1p1p/p1p1p1p1p1/1p1p1p1p1p/p1p1p1p1p1/10/10/1P1P1P1P1P/P1P1P1P1P1/1P1P1P1P1P/P1P1P1P1P1;";
+
         private Socket _serverSocket;
         private Client[] _clientList = new Client[2];
 
         private short _port;
+
+        private Board _board;
+        private string _currentState = string.Empty;
         private struct Client
         {
-            public Socket? Socket { get; }
+            public Socket Socket { get; }
             public byte PlayerId { get; }
-            public Client(Socket? socket, byte player)
+            public Client(Socket socket, byte player)
             {
                 Socket = socket;
                 PlayerId = player;
@@ -36,6 +42,9 @@ namespace Checkers.Networking
             _serverSocket.Listen(100);
 
             Console.WriteLine($"Server setup and running on {endPoint.Address}:{endPoint.Port}");
+            _board = new Board();
+            _board.Init(Setup);
+            _currentState = Setup;
         }
 
         public void Run()
@@ -67,6 +76,9 @@ namespace Checkers.Networking
         private void HandleClient(Client client)
         {
             Console.WriteLine($"Client connection from: {client.Socket.RemoteEndPoint}");
+
+            // Sends the basic setup to the client.
+            UpdateBoard(client);
             byte[] message = new byte[1024];
 
             while (client.Socket.Connected)
@@ -84,6 +96,11 @@ namespace Checkers.Networking
             }
 
             client.Socket.Close();
+        }
+
+        private void UpdateBoard(Client client)
+        {
+            client.Socket.Send(Encoding.UTF8.GetBytes(_currentState));
         }
     }
 }
