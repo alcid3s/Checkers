@@ -1,4 +1,5 @@
 ﻿using Checkers.board;
+using Checkers.pieces;
 using System;
 using System.Collections.Generic;
 using System.Linq;

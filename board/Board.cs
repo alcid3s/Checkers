@@ -5,6 +5,7 @@ using Checkers.graphics;
 using Checkers.Screens;
 using Checkers.Networking;
 using System.Text;
+using Checkers.pieces;
 
 namespace Checkers.board
 {
@@ -90,7 +91,7 @@ namespace Checkers.board
                         _selectedPosition = new(tile, tile.Piece);
 
                         // Will change color of all tiles on which the piece can move.
-                        _selectedPosition.Piece.CalculateLegalMoves(tile).ForEach(position =>
+                        _selectedPosition.Piece.CalculateRegularMoves(tile).ForEach(position =>
                         {
                             ScreenManager.Board.Tiles[position].Color = Color.VIOLET;
                         });
@@ -99,7 +100,7 @@ namespace Checkers.board
                     // If the player already selected a position and presses on a tile without a piece on it.
                     else if(tile.Piece == null && _selectedPosition.Tile != null && _selectedPosition.Piece != null)
                     {
-                        List<int> legalMoves = _selectedPosition.Piece.CalculateLegalMoves(_selectedPosition.Tile);
+                        List<int> legalMoves = _selectedPosition.Piece.CalculateRegularMoves(_selectedPosition.Tile);
 
                         // if the tile clicked is a legal move for the piece.
                         if (legalMoves.Contains(tile.GetPositionInTilesArray()))
@@ -119,8 +120,8 @@ namespace Checkers.board
             Console.WriteLine($"FEN: {fen}");
             var dict = new Dictionary<char, Piece>()
             {
-                ['P'] = new Piece(Piece.Side.White),
-                ['p'] = new Piece(Piece.Side.Black)
+                ['P'] = new ManPiece(Piece.Side.White),
+                ['p'] = new ManPiece(Piece.Side.Black)
             };
 
             int x = 0, y = 0;
@@ -173,7 +174,7 @@ namespace Checkers.board
                 // Check if the place selected contains a piece on the board the server holds
                 if (Tiles[currentPosition].Piece != null)
                 {
-                    List<int> legalMoves = Tiles[currentPosition].Piece.CalculateLegalMoves(Tiles[currentPosition]);
+                    List<int> legalMoves = Tiles[currentPosition].Piece.CalculateRegularMoves(Tiles[currentPosition]);
 
                     // If the legalMoves are correct according to the server return true
                     if (legalMoves.Contains(futurePosition))

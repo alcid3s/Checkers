@@ -1,4 +1,5 @@
 ﻿using Checkers.graphics;
+using Checkers.pieces;
 using Checkers.Screens;
 using Raylib_cs;
 using System.Numerics;
@@ -66,10 +67,10 @@ namespace Checkers.board
             return (int)(PositionOnBoard.X + (PositionOnBoard.Y * 10));
         }
 
-        public int? GetNorthWest()
+        public Tile? GetNorthWest()
         {
             int bounds = GetPositionInTilesArray() - 11;
-            return bounds >= 0 && bounds <= 99 && !CheckTile(bounds) ? bounds : null;
+            return bounds >= 0 && bounds <= 99 && !CheckTile(bounds) ? ScreenManager.Board.Tiles[bounds] : null;
 
             //if(bounds >= 0 && bounds <= 99 && !CheckTile(bounds))
             //{
@@ -81,22 +82,22 @@ namespace Checkers.board
             //}
         }
 
-        public int? GetNorthEast()
+        public Tile? GetNorthEast()
         {
             int bounds = GetPositionInTilesArray() - 9;
-            return bounds >= 0 && bounds <= 99 && !CheckTile(bounds) ? bounds : null;
+            return bounds >= 0 && bounds <= 99 && !CheckTile(bounds) ? ScreenManager.Board.Tiles[bounds] : null;
         }
 
-        public int? GetSouthEast()
+        public Tile? GetSouthEast()
         {
             int bounds = GetPositionInTilesArray() + 11;
-            return bounds >= 0 && bounds <= 99 && !CheckTile(bounds) ? bounds : null;
+            return bounds >= 0 && bounds <= 99 && !CheckTile(bounds) ? ScreenManager.Board.Tiles[bounds] : null;
         }
 
-        public int? GetSouthWest()
+        public Tile? GetSouthWest()
         {
             int bounds = GetPositionInTilesArray() + 9;
-            return bounds >= 0 && bounds <= 99 && !CheckTile(bounds) ? bounds : null;
+            return bounds >= 0 && bounds <= 99 && !CheckTile(bounds) ? ScreenManager.Board.Tiles[bounds] : null;
         }
 
         // This method will make sure the piece cant move to the other side of the board. 
