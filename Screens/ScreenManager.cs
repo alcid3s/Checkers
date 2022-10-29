@@ -12,8 +12,13 @@ using Checkers.Networking;
 
 namespace Checkers.Screens
 {
-    internal class ScreenManager : Screen
+    public class ScreenManager : Screen
     {
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
+        public static string Path = Directory.GetParent(Directory.GetParent(Directory.GetParent(Directory.GetCurrentDirectory()).ToString()).ToString()).ToString() + "/SavedGames";
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
+
+        private string _suffix = ".txt";
         public enum ScreenState
         {
             MainScreenState,
@@ -34,7 +39,7 @@ namespace Checkers.Screens
         private HostOrJoinScreen _hostOrJoinScreen = new();
         private JoinScreen _joinScreen = new();
 
-        private WaitForPlayerScreen _waitScreen;
+        private WaitForPlayerScreen _waitScreen = new();
 
 
         private Server? _server = null;
@@ -45,10 +50,6 @@ namespace Checkers.Screens
         public ScreenManager(Color backGround)
         {
             _backGround = backGround;
-            new Thread(() =>
-            {
-                _waitScreen = new WaitForPlayerScreen();
-            }).Start();
         }
         public override void Update()
         {
@@ -59,6 +60,10 @@ namespace Checkers.Screens
                     break;
 
                 case ScreenState.HostOrJoinState:
+
+                    // New thread goes here because it comes after MainScreen, and mainscreen holds SaveData state.
+                    new Thread(SaveData).Start();
+
                     _hostOrJoinScreen.Update();
                     break;
 
@@ -160,6 +165,33 @@ namespace Checkers.Screens
                     ClearBackground(_backGround);
                     break;
             }
+        }
+
+        private void SaveData()
+        {
+            if (!Directory.Exists(Path))
+                Directory.CreateDirectory(Path);
+
+            var sr = new StreamWriter(File.Create(Path + CreateFileName() + _suffix));
+
+            string currentInformation = string.Empty;
+            // While the game isn't finished
+            while (true)
+            {
+                if (!currentInformation.Equals(Board.NewMove))
+                {
+                    currentInformation = Board.NewMove;
+                    sr.WriteLine(currentInformation);
+                }
+            }
+
+            // game has finished
+            sr.Close();
+        }
+
+        private string CreateFileName()
+        {
+            return $"/Checkers_{DateTime.Now.Year}-{DateTime.Now.Month}-{DateTime.Now.Date}_{DateTime.Now.Hour}-{DateTime.Now.Minute}-{DateTime.Now.Second}";
         }
     }
 }

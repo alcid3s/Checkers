@@ -26,6 +26,8 @@ namespace Checkers.board
         private Piece.Side _sideOfPlayer;
         public SelectedPosition PositionSelected { get; set; }
 
+        public string NewMove { get; set; } = string.Empty;
+
         private readonly bool _isPlayer;
 
         public enum Reply
@@ -167,10 +169,9 @@ namespace Checkers.board
             // They wont ever be null but it removes all errors :)
             if (PositionSelected.Piece != null && PositionSelected.Tile != null)
             {
-                //Manager.Move(PositionSelected.Piece, tile.GetPositionInTilesArray());
-                //Tiles[tile.GetPositionInTilesArray()].Attach(PositionSelected.Piece);
-                //PositionSelected.Tile.Detach();
                 Manager.Move(PositionSelected.Piece, tile.GetPositionInTilesArray());
+
+                NewMove = PositionSelected.Tile.GetPositionInTilesArray() + ":" + typeof(Piece) + ":" + tile.GetPositionInTilesArray();
 
                 if (!_isPlayer)
                 {
