@@ -147,7 +147,7 @@ namespace Checkers.board
 
             if (GotReply.Equals(Reply.TRUE))
             {
-                GotReply = Reply.FALSE;
+                GotReply = Reply.NONE;
                 ChangePosition(tile);
 
                 if (!_isPlayer)

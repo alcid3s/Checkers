@@ -129,15 +129,11 @@ namespace Checkers.Networking
                         client.Socket.Send(Encoding.UTF8.GetBytes("T"));
                         _board.GotReply = Board.Reply.TRUE;
 
-                        foreach (Client c in _clientList)
-                        {
-                            _board.PositionSelected = new(_board.Tiles[data.Item1], _board.Tiles[data.Item1].Piece);
+                        _board.PositionSelected = new(_board.Tiles[data.Item1], _board.Tiles[data.Item1].Piece);
 
-                            // The move was legal so this updates the board for server and client that sended the information.
-                            client.Socket.Send(Encoding.UTF8.GetBytes("T"));
-                            Client[] clients = _clientList.Where(x => !x.Equals(client)).ToList().ToArray();
-                            clients[0].Socket.Send(Encoding.UTF8.GetBytes(information));
-                        }
+                        // The move was legal so this updates the board for server and client that sended the information.
+                        Client opponent = _clientList.Where(x => !x.Equals(client)).ToList().First();
+                        opponent.Socket.Send(Encoding.UTF8.GetBytes(information));
                     }
                     else
                     {
