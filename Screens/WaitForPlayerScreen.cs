@@ -50,13 +50,22 @@ namespace Checkers.Screens
         private string GetIP()
         {
             string ip = "NULL";
-            ip = Dns.GetHostByName(Dns.GetHostName()).AddressList[0].ToString();
+            try
+            {
+                IPHostEntry ipEntry = Dns.GetHostEntry(Dns.GetHostName());
+                ip = ipEntry.AddressList[1].ToString();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+
             return ip;
         }
         public override void Draw()
         {
             DrawTextureRec(_mrBean, _frameRec, _position, Color.WHITE);
-            DrawText("Waiting for opponent to join...", (int)_position.X + 20, GetScreenHeight() - 50, 40, Color.WHITE);
+            DrawText("Waiting for opponent to join...", (int)_position.X, GetScreenHeight() - 50, 40, Color.WHITE);
             DrawText($"IP of server: {_ipAddress}, port: 1337", (int)_position.X + 20, GetScreenHeight() - 150, 40, Color.MAROON);
         }
 
