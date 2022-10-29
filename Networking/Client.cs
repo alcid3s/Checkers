@@ -48,7 +48,7 @@ namespace Checkers.Networking
             Console.WriteLine("CLIENT: LISTENING");
             if (_socket != null)
             {
-                while (true)
+                while (_socket.Connected)
                 {
                     byte[] message = new byte[1024];
                     _socket.Receive(message);

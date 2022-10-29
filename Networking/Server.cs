@@ -21,6 +21,7 @@ namespace Checkers.Networking
         private Client[] _clientList = new Client[2]; 
         private readonly short _port = 1337;
 
+        // The server also holds a board to validate moves.
         private readonly Board _board;
         private readonly string _currentState = string.Empty;
 
@@ -59,7 +60,7 @@ namespace Checkers.Networking
         {
             new Thread(() =>
             {
-                while (true)
+                while (AmountOfPlayersActive != 2)
                 {
                     // New incoming connection.
                     Socket? socket = null;
@@ -78,7 +79,6 @@ namespace Checkers.Networking
                             side = Piece.Side.White;
                             _whiteIsTaken = true;
                         }
-                            
 
                         Client client = new(socket, AmountOfPlayersActive, side);
                         _clientList[AmountOfPlayersActive] = client;
@@ -145,7 +145,6 @@ namespace Checkers.Networking
                     Console.WriteLine($"Server got error with Client {client.PlayerId}:\n{e}");
                 }
             }
-
             client.Socket.Close();
         }
 
