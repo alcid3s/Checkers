@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Checkers.Networking;
 using System.Numerics;
+using System.Net;
 
 namespace Checkers.Screens
 {
@@ -15,6 +16,8 @@ namespace Checkers.Screens
         // Size of each frame, image in total has 5 x 21 frames.
         private const short _widthBean = 640;
         private const short _heightBean = 358;
+
+        private string _ipAddress = string.Empty;
 
         // Frames
         private const int _framesSpeed = 15;
@@ -33,16 +36,28 @@ namespace Checkers.Screens
         public WaitForPlayerScreen()
         {
             _mrBean = Program.MrBeanSprite;
-
             _position = new Vector2((GetScreenWidth() / 2) - (_mrBean.width / (5 * 2)), (GetScreenHeight() / 2) - (_mrBean.height / (21 * 2)));
-            //_position = new Vector2(100, 100);
             _frameRec = new Rectangle(0.0f, 0.0f, _widthBean, _heightBean);
+
+            new Thread(() =>
+            {
+                _ipAddress = GetIP();
+            }).Start();
+
             Ready = true;
-            Console.WriteLine("ready");
+        }
+
+        private string GetIP()
+        {
+            string ip = "NULL";
+            ip = Dns.GetHostByName(Dns.GetHostName()).AddressList[0].ToString();
+            return ip;
         }
         public override void Draw()
         {
             DrawTextureRec(_mrBean, _frameRec, _position, Color.WHITE);
+            DrawText("Waiting for opponent to join...", (int)_position.X + 20, GetScreenHeight() - 50, 40, Color.WHITE);
+            DrawText($"IP of server: {_ipAddress}, port: 1337", (int)_position.X + 20, GetScreenHeight() - 150, 40, Color.MAROON);
         }
 
         public override void Update()

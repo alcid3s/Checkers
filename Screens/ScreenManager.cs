@@ -137,7 +137,7 @@ namespace Checkers.Screens
                     break;
 
                 case ScreenState.WaitState:
-                    ClearBackground(Color.RAYWHITE);
+                    ClearBackground(_backGround);
                     if (_waitScreen.Ready)
                         _waitScreen.Draw();
                     break;
