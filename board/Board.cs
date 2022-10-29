@@ -88,7 +88,7 @@ namespace Checkers.board
                     Console.WriteLine($"X: {tile.PositionOnBoard.X}, Y: {tile.PositionOnBoard.Y}");
 
                     // if the tile contains a piece and the piece is of the same side as the player.
-                    if (tile.Piece != null && tile.Piece.SideOfPiece.Equals(_sideOfPlayer) && Manager.LegalPieces().Contains(tile.Piece))
+                    if (tile.Piece != null && /*tile.Piece.SideOfPiece.Equals(_sideOfPlayer) &&*/ Manager.LegalPieces().Contains(tile.Piece))
                     {
                         // The piece is selected.
                         PositionSelected = new(tile, tile.Piece);
@@ -102,7 +102,7 @@ namespace Checkers.board
                         if (tile.Piece.CalculateForcingMoves().Count > 0)
                             tile.Piece.CalculateForcingMoves().ForEach(position =>
                             {
-                                ScreenManager.Board.Tiles[position].Color = Color.VIOLET;
+                                ScreenManager.Board.Tiles[position].Color = Color.BLUE;
                             });
                         else
                             tile.Piece.CalculateRegularMoves().ForEach(position =>
@@ -115,7 +115,7 @@ namespace Checkers.board
                     // If the player already selected a position and presses on a tile without a piece on it.
                     else if (tile.Piece == null && PositionSelected.Tile != null && PositionSelected.Piece != null)
                     {
-                        List<int> legalMoves = PositionSelected.Piece.CalculateRegularMoves();
+                        List<int> legalMoves = PositionSelected.Piece.CalculateForcingMoves();
                         if (legalMoves.Count == 0)
                             legalMoves = PositionSelected.Piece.CalculateRegularMoves();
 
@@ -155,10 +155,11 @@ namespace Checkers.board
                 // They wont every be null but it removes all errors :)
                 if(PositionSelected.Piece != null && PositionSelected.Tile != null)
                 {
-                    Tiles[tile.GetPositionInTilesArray()].Attach(PositionSelected.Tile.Detach());
-                    
+                    //Tiles[tile.GetPositionInTilesArray()].Attach(PositionSelected.Tile.Detach());
+
                     //tile.Attach(_selectedPosition.Piece);
 
+                    Manager.Move(PositionSelected.Piece, tile.GetPositionInTilesArray());
 
                     if (!_isPlayer)
                     {

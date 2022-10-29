@@ -1,6 +1,7 @@
 ﻿using Checkers.board;
 using Checkers.Custom;
 using Checkers.graphics;
+using Checkers.pieces;
 using Checkers.Screens;
 using Raylib_cs;
 using static Raylib_cs.Raylib;
@@ -18,6 +19,8 @@ namespace Checkers
             const int screenWidth = 960;
             const int screenHeight = 960;
             InitWindow(screenWidth, screenHeight, "Checkers");
+
+            Piece.GetTextures();
 
             SetTraceLogLevel(LOG_NONE);
 

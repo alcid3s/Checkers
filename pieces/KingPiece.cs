@@ -8,21 +8,18 @@ namespace Checkers.pieces
     {
         public KingPiece(Side side) : base(side)
         {
-            Image image = LoadImage("../../../res/Pieces.png");
             if (side == Side.White)
             {
-                ImageCrop(ref image, new Rectangle(0, 0, 96, 96));
+                Texture = TextureKingWhite;
             }
             else if (side == Side.Black)
             {
-                ImageCrop(ref image, new Rectangle(96, 96, 192, 192));
+                Texture = TextureKingBlack;
             }
             else
             {
                 throw new Exception("Error, Side is null");
             }
-            Texture = LoadTextureFromImage(image);
-            UnloadImage(image);
         }
 
         public override List<int> CalculateForcingMoves()

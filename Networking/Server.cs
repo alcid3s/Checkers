@@ -117,16 +117,17 @@ namespace Checkers.Networking
                     Console.WriteLine(data);
 
                     //Check if move player wants to do is legal.
-                    if (_board.IsLegalMove(data.Item1, data.Item2, data.Item3))
+                    if (_board.Tiles[data.Item1]?.Piece != null && _board.Manager.Move(_board.Tiles[data.Item1].Piece, data.Item3))
                     {
                         _board.PositionSelected = new(_board.Tiles[data.Item1], _board.Tiles[data.Item1].Piece);
 
+                        /*
                         // This thread makes sure the piece also gets moved on the board the server holds.
                         new Thread(() =>
                         {
                             _board.AwaitReplyFromServer(_board.Tiles[data.Item3]);
                         }).Start();
-
+                        */
                         // The move was legal so this updates the board for server and client that sended the information.
                         client.Socket.Send(Encoding.UTF8.GetBytes("T"));
                         _board.GotReply = true;
@@ -143,10 +144,12 @@ namespace Checkers.Networking
                         information = string.Empty;
 
                         // Change turn to other party.
+                        /*
                         if (_whoHasTurn.Equals(Piece.Side.White))
                             _whoHasTurn = Piece.Side.Black;
                         else if (_whoHasTurn.Equals(Piece.Side.Black))
                             _whoHasTurn = Piece.Side.White;
+                        */
                     }
                     else
                     {
