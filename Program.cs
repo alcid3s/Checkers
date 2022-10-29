@@ -8,10 +8,10 @@ using static Raylib_cs.TraceLogLevel;
 
 namespace Checkers
 {
-    internal class Program
+    public class Program
     {
         public static Texture2D MrBeanSprite;
-        static void Main(string[] args)
+        public static void Main()
         {
             SetTraceLogLevel(LOG_NONE);
 

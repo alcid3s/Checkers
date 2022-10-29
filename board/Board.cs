@@ -143,7 +143,7 @@ namespace Checkers.board
         // Is public because server also needs to run this on another thread.
         public void AwaitReplyFromServer(Tile tile)
         {
-            while (GotReply.Equals(Reply.NONE));
+            while (GotReply.Equals(Reply.NONE)) ;
 
             if (GotReply.Equals(Reply.TRUE))
             {
@@ -195,10 +195,7 @@ namespace Checkers.board
             Manager = new PieceManager(this);
 
             Console.WriteLine($"FEN: {fen}");
-            if (_isPlayer)
-                Console.WriteLine("---------------EOL OF SETUP CLIENT-------------------\n");
-            else
-                Console.WriteLine("---------------EOL OF SETUP SERVER-------------------\n");
+
 
             int x = 0, y = 0;
             bool endOfFEN = false;
@@ -252,13 +249,17 @@ namespace Checkers.board
                 }
             }
 
+            if (_isPlayer)
+                Console.WriteLine("---------------EOL OF SETUP CLIENT-------------------\n");
+            else
+                Console.WriteLine("---------------EOL OF SETUP SERVER-------------------\n");
+
             HasInitialised = true;
         }
 
         // This method should only be used by the server to verify if the move is legal.
         public bool IsLegalMove(int currentPosition, string typeOfPiece, int futurePosition)
         {
-
             if (!_isPlayer)
             {
                 Console.WriteLine($"SERVER: currentpos: {currentPosition} and containspiece = {Tiles[currentPosition].Piece != null}");
@@ -277,7 +278,6 @@ namespace Checkers.board
                 }
             }
             return false;
-
         }
 
         // Parses information the server sends, server also uses this to parse the message the client sends. For changes in message structure change this method.

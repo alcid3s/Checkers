@@ -26,6 +26,7 @@ namespace Checkers.Networking
 
         public void Connect()
         {
+            Console.WriteLine("CLIENT: CONNECTING  WITH SERVER");
             IPEndPoint endPoint = new(_address, _port);
             _socket = new Socket(_address.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
 
@@ -44,10 +45,10 @@ namespace Checkers.Networking
         private void Listen()
         {
             bool firstMessage = true;
-
+            Console.WriteLine("CLIENT: LISTENING");
             if (_socket != null)
             {
-                while (_socket.Connected)
+                while (true)
                 {
                     byte[] message = new byte[1024];
                     _socket.Receive(message);

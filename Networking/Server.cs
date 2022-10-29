@@ -98,7 +98,7 @@ namespace Checkers.Networking
 
         private void HandleClient(Client client)
         {
-            Console.WriteLine($"SERVER: Client connection from: {client.Socket.RemoteEndPoint}");
+            Console.WriteLine($"SERVER: Client connection from: {client.Socket.RemoteEndPoint}, size of list is now {_clientList.Length}");
 
             // Sends the basic setup to the client.
             SendBasicData(client);
@@ -133,17 +133,8 @@ namespace Checkers.Networking
 
                             // The move was legal so this updates the board for server and client that sended the information.
                             client.Socket.Send(Encoding.UTF8.GetBytes("T"));
-
-
-                            foreach (Client c in _clientList)
-                            {
-                                // Send the newly made moves to the other client
-                                if (!c.Equals(client)
-                                {
-                                    Console.WriteLine($"SERVER: SENDING NEW POSITION TO {c.Socket.RemoteEndPoint}, NEW MESSAGE CONTAINS: {information}");
-                                    client.Socket.Send(Encoding.UTF8.GetBytes(information));
-                                }
-                            }
+                            Client[] clients = _clientList.Where(x => !x.Equals(client)).ToList().ToArray();
+                            clients[0].Socket.Send(Encoding.UTF8.GetBytes(information));
 
                             information = string.Empty;
 
@@ -167,7 +158,6 @@ namespace Checkers.Networking
 
         private void SendBasicData(Client client)
         {
-            Console.WriteLine($"SERVER: Sending basic setup to {client.Socket.RemoteEndPoint}");
             if (client.Side.Equals(Piece.Side.White))
                 client.Socket.Send(Encoding.UTF8.GetBytes(_currentState + 'W'));
             else if(client.Side.Equals(Piece.Side.Black))
