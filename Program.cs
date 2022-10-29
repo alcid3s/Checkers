@@ -10,7 +10,7 @@ namespace Checkers
 {
     internal class Program
     {
-
+        public static Texture2D MrBeanSprite;
         static void Main(string[] args)
         {
             SetTraceLogLevel(LOG_NONE);
@@ -18,6 +18,8 @@ namespace Checkers
             const int screenWidth = 960;
             const int screenHeight = 960;
             InitWindow(screenWidth, screenHeight, "Checkers");
+
+            MrBeanSprite = LoadTexture("../../../res/MrBeanSprite.png");
 
             SetTraceLogLevel(LOG_NONE);
 

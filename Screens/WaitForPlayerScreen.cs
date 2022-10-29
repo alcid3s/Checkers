@@ -17,7 +17,7 @@ namespace Checkers.Screens
         private const short _heightBean = 358;
 
         // Frames
-        private const int _framesSpeed = 30;
+        private const int _framesSpeed = 15;
         private int _framesCounter = 0;
         private int _currentFrame = 0;
 
@@ -32,15 +32,16 @@ namespace Checkers.Screens
         public bool Ready { get; private set; } = false;
         public WaitForPlayerScreen()
         {
-            _mrBean = LoadTexture("../../../res/MrBeanSprite.png");
-            //_position = new Vector2((GetScreenWidth() / 2) - (_mrBean.width / (5 * 2)), (GetScreenHeight() / 2) - (_mrBean.height / (21 * 2)));
-            _position = new Vector2(GetScreenWidth() / 2, GetScreenHeight() / 2);
-            _frameRec = new Rectangle(0.0f, 0.0f, (float)_mrBean.width / 5, (float)_mrBean.height / 21);
+            _mrBean = Program.MrBeanSprite;
+
+            _position = new Vector2((GetScreenWidth() / 2) - (_mrBean.width / (5 * 2)), (GetScreenHeight() / 2) - (_mrBean.height / (21 * 2)));
+            //_position = new Vector2(100, 100);
+            _frameRec = new Rectangle(0.0f, 0.0f, _widthBean, _heightBean);
             Ready = true;
+            Console.WriteLine("ready");
         }
         public override void Draw()
         {
-            DrawTexture(_mrBean, 15, 40, Color.WHITE);
             DrawTextureRec(_mrBean, _frameRec, _position, Color.WHITE);
         }
 
@@ -62,24 +63,24 @@ namespace Checkers.Screens
                 if (_currentFrame > 4)
                 {
                     _currentFrame = 0;
-                    _frameRec.y += (_mrBean.height / 21);
+                    _frameRec.y += (float)(_mrBean.height / 21);
                 }
 
-                if(_frameRec.y > (_mrBean.height - (_mrBean.height / 21)))
+                if (_frameRec.y > (_mrBean.height - (_mrBean.height / 21)))
                 {
                     _frameRec.y = 0;
                 }
 
                 _frameRec.x = (float)_currentFrame * (float)_mrBean.width / 5;
-                Console.WriteLine($"FrameRec.x = {_frameRec.x}, FrameRec.y = {_frameRec.y}");
             }
+            //Console.WriteLine($"frameCounter = {_framesCounter}, _currentFrame = {_currentFrame}, FrameRec.x = {_frameRec.x},\t\tFrameRec.y = {_frameRec.y}");
 
             if (Server.AmountOfPlayersActive == 2)
             {
                 ScreenManager.State = ScreenManager.ScreenState.PlayState;
                 UnloadTexture(_mrBean);
             }
-                
+
         }
     }
 }
