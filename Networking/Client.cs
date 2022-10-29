@@ -1,4 +1,5 @@
 ﻿using Checkers.Screens;
+using Microsoft.VisualBasic;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,12 +13,12 @@ namespace Checkers.Networking
 {
     public class Client
     {
-        private readonly short _port;
+        private readonly int _port;
         private readonly IPAddress _address;
 
         private static Socket? _socket;
 
-        public Client(string ip, short port)
+        public Client(string ip, int port)
         {
             _address = IPAddress.Parse(ip);
             _port = port;
@@ -54,6 +55,7 @@ namespace Checkers.Networking
 
                     if (firstMessage)
                     {
+                        Console.WriteLine("CLIENT: Initialising FEN");
                         ScreenManager.Board.HasFen = response;
                         firstMessage = false;
                     }
@@ -72,10 +74,11 @@ namespace Checkers.Networking
             }
         }
 
-        public static async Task Send(string message)
+        public static Task Send(string message)
         {
-            if(_socket != null)
+            if (_socket != null)
                 _ = _socket.SendAsync(Encoding.UTF8.GetBytes(message), SocketFlags.Partial);
+            return Task.CompletedTask;
         }
     }
 }

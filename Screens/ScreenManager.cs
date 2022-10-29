@@ -31,6 +31,7 @@ namespace Checkers.Screens
 
         private MainScreen _mainScreen = new(Color.LIME);
         private HostOrJoinScreen _hostOrJoinScreen = new();
+        private JoinScreen _joinScreen = new();
 
 
         private Server? _server = null;
@@ -55,9 +56,19 @@ namespace Checkers.Screens
                 case ScreenState.HostState:
                     break;
                 case ScreenState.JoinState:
+                    _joinScreen.Update();
                     break;
                 case ScreenState.PlayState:
-                    Board.Update();
+                    if (_firstTimeRunBoard)
+                    {
+                        _client = new Client(_joinScreen.Ip, _joinScreen.Port);
+                        _client.Connect();
+                        _firstTimeRunBoard = false;
+                    }
+                    else if (Board.HasFen != String.Empty && !Board.HasInitialised)
+                        Board.Init(Board.HasFen);
+                    else if(Board.HasInitialised)
+                        Board.Update();
                     break;
                 case ScreenState.PlayStateWithServer:
                     if (_firstTimeRunBoard)
@@ -85,20 +96,27 @@ namespace Checkers.Screens
                     ClearBackground(_backGround);
                     _mainScreen.Draw();
                     break;
+
                 case ScreenState.HostOrJoinState:
                     ClearBackground(_backGround);
                     _hostOrJoinScreen.Draw();
                     break;
+
                 case ScreenState.HostState:
                     ClearBackground(_backGround);
                     break;
+
                 case ScreenState.JoinState:
                     ClearBackground(_backGround);
+                    _joinScreen.Draw();
                     break;
+
                 case ScreenState.PlayState:
                     ClearBackground(_backGround);
-                    Board.Draw();
+                    if(Board.HasInitialised)
+                        Board.Draw();
                     break;
+
                 case ScreenState.PlayStateWithServer:
                     ClearBackground(_backGround);
                     if(Board.HasInitialised)

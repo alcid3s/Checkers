@@ -30,7 +30,8 @@ namespace Checkers
                 manager.Draw();
                 EndDrawing();
             }
-            
+
+            CloseWindow();
         }
     }
 }

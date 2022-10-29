@@ -33,7 +33,7 @@ namespace Checkers.Custom
         public void Draw()
         {
             DrawRectangleRec(_rectangle, _color);
-            DrawText(_text, (int)(_rectangle.x + (_rectangle.x / 8)), (int)(_rectangle.y + (_rectangle.y / 8)), _sizeText, Color.BLACK);
+            DrawText(_text, (int)(_rectangle.x + (_rectangle.width / 16)), (int)(_rectangle.y + (_sizeText / 3)), _sizeText, Color.BLACK);
         }
 
         public void Update()
