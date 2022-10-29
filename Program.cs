@@ -1,6 +1,7 @@
 ﻿using Checkers.board;
 using Checkers.Custom;
 using Checkers.graphics;
+using Checkers.pieces;
 using Checkers.Screens;
 using Raylib_cs;
 using static Raylib_cs.Raylib;
@@ -20,6 +21,8 @@ namespace Checkers
             InitWindow(screenWidth, screenHeight, "Checkers");
 
             MrBeanSprite = LoadTexture("../../../res/MrBeanSprite.png");
+
+            Piece.GetTextures();
 
             SetTraceLogLevel(LOG_NONE);
 

@@ -78,7 +78,6 @@ namespace Checkers.Networking
                         }
                         else if (response.Contains("F"))
                         {
-                            // Gives deadlock condition. Needs Change
                             ScreenManager.Board.GotReply = board.Board.Reply.FALSE;
                         }
                     }

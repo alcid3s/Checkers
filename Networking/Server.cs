@@ -114,37 +114,34 @@ namespace Checkers.Networking
                     string information = Encoding.UTF8.GetString(message, 0, receive);
 
                     // If the player who has the turn also makes a move
-                    if (client.Side.Equals(_board.Manager.WhoseTurn))
+                    //if (client.Side.Equals(_whoHasTurn))        {
+                    Console.WriteLine($"DATA FROM CLIENT: {information}");
+            
+                    (int, string, int) data = _board.ParseMessage(information);
+
+                    Console.WriteLine(data);
+
+                    //Check if move player wants to do is legal.
+                    if (_board.Tiles[data.Item1]?.Piece != null && _board.Manager.Move(_board.Tiles[data.Item1].Piece, data.Item3))
                     {
                         Console.WriteLine($"SERVER: DATA FROM CLIENT: {information}");
+                        // The move was legal so this updates the board for server and client that sended the information.
+                        client.Socket.Send(Encoding.UTF8.GetBytes("T"));
+                        _board.GotReply = Board.Reply.TRUE;
 
-                        (int, string, int) data = _board.ParseMessage(information);
-
-                        //Check if move player wants to do is legal.
-                        if (_board.IsLegalMove(data.Item1, data.Item2, data.Item3))
+                        foreach (Client c in _clientList)
                         {
                             _board.PositionSelected = new(_board.Tiles[data.Item1], _board.Tiles[data.Item1].Piece);
-
-                            // This thread makes sure the piece also gets moved on the board the server holds.
-                            new Thread(() =>
-                            {
-                                _board.ChangePosition(_board.Tiles[data.Item3]);
-                            }).Start();
 
                             // The move was legal so this updates the board for server and client that sended the information.
                             client.Socket.Send(Encoding.UTF8.GetBytes("T"));
                             Client[] clients = _clientList.Where(x => !x.Equals(client)).ToList().ToArray();
                             clients[0].Socket.Send(Encoding.UTF8.GetBytes(information));
-
-                            information = string.Empty;
-
-                            // Change turn to other party.
-                            _board.Manager.ToggleTurns();
                         }
-                        else
-                        {
-                            client.Socket.Send(Encoding.UTF8.GetBytes("F"));
-                        }
+                    }
+                    else
+                    {
+                        client.Socket.Send(Encoding.UTF8.GetBytes("F"));
                     }
                 }
                 catch (Exception e)
