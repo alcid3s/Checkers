@@ -125,14 +125,6 @@ namespace Checkers.Networking
                     if (_board.Tiles[data.Item1]?.Piece != null && _board.Manager.Move(_board.Tiles[data.Item1].Piece, data.Item3))
                     {
                         Console.WriteLine($"SERVER: DATA FROM CLIENT: {information}");
-
-                        /*
-                        // This thread makes sure the piece also gets moved on the board the server holds.
-                        new Thread(() =>
-                        {
-                            _board.AwaitReplyFromServer(_board.Tiles[data.Item3]);
-                        }).Start();
-                        */
                         // The move was legal so this updates the board for server and client that sended the information.
                         client.Socket.Send(Encoding.UTF8.GetBytes("T"));
                         _board.GotReply = Board.Reply.TRUE;
@@ -141,25 +133,15 @@ namespace Checkers.Networking
                         {
                             _board.PositionSelected = new(_board.Tiles[data.Item1], _board.Tiles[data.Item1].Piece);
 
-                            // This thread makes sure the piece also gets moved on the board the server holds.
-                            new Thread(() =>
-                            {
-                                _board.ChangePosition(_board.Tiles[data.Item3]);
-                            }).Start();
-
                             // The move was legal so this updates the board for server and client that sended the information.
                             client.Socket.Send(Encoding.UTF8.GetBytes("T"));
                             Client[] clients = _clientList.Where(x => !x.Equals(client)).ToList().ToArray();
                             clients[0].Socket.Send(Encoding.UTF8.GetBytes(information));
-
-                            // Change turn to other party.
-                            /*
-                            if (_whoHasTurn.Equals(Piece.Side.White))
-                                _whoHasTurn = Piece.Side.Black;
-                            else if (_whoHasTurn.Equals(Piece.Side.Black))
-                                _whoHasTurn = Piece.Side.White;
-                            */
                         }
+                    }
+                    else
+                    {
+                        client.Socket.Send(Encoding.UTF8.GetBytes("F"));
                     }
                 }
                 catch (Exception e)

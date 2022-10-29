@@ -167,32 +167,25 @@ namespace Checkers.board
             // They wont ever be null but it removes all errors :)
             if (PositionSelected.Piece != null && PositionSelected.Tile != null)
             {
-
                 //Manager.Move(PositionSelected.Piece, tile.GetPositionInTilesArray());
-                Tiles[tile.GetPositionInTilesArray()].Attach(PositionSelected.Piece);
-                PositionSelected.Tile.Detach();
+                //Tiles[tile.GetPositionInTilesArray()].Attach(PositionSelected.Piece);
+                //PositionSelected.Tile.Detach();
+                Manager.Move(PositionSelected.Piece, tile.GetPositionInTilesArray());
+
+                if (!_isPlayer)
+                {
+                    Console.WriteLine($"SERVER: NEW POSITION FOR PIECE: {tile.GetPositionInTilesArray()}");
+                }
+
+                if (_isPlayer)
+                {
+                    Console.WriteLine($"CLIENT: NEW POS = {tile.GetPositionInTilesArray()}");
+                }
 
                 PositionSelected = new(null, null);
 
                 foreach (Tile t in Tiles)
                 {
-                    //Tiles[tile.GetPositionInTilesArray()].Attach(PositionSelected.Tile.Detach());
-
-                    //tile.Attach(_selectedPosition.Piece);
-
-                    Manager.Move(PositionSelected.Piece, tile.GetPositionInTilesArray());
-
-                    if (!_isPlayer)
-                    {
-                        Console.WriteLine($"SERVER: NEW POSITION FOR PIECE: {tile.GetPositionInTilesArray()}");
-                    }
-
-                    if (_isPlayer)
-                    {
-                        Console.WriteLine($"CLIENT: NEW POS = {tile.GetPositionInTilesArray()}");
-                    }
-                    PositionSelected = new(null, null);
-
                     t.ResetColor();
                 }
             }
