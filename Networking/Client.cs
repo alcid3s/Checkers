@@ -73,11 +73,12 @@ namespace Checkers.Networking
                         // If your own move has been validated
                         else if (response.Contains("T"))
                         {
-                            ScreenManager.Board.GotReply = true;
+                            ScreenManager.Board.GotReply = board.Board.Reply.TRUE;
                         }
                         else if (response.Contains("F"))
                         {
-                            ScreenManager.Board.GotReply = false;
+                            // Gives deadlock condition. Needs Change
+                            ScreenManager.Board.GotReply = board.Board.Reply.FALSE;
                         }
                     }
                 }

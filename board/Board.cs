@@ -10,7 +10,7 @@ namespace Checkers.board
     public class Board
     {
         // Used for when the server sends a message to the client.
-        public bool GotReply { get; set; } = false;
+        public Reply GotReply { get; set; } = Reply.NONE;
 
         // bool and string are used so the server can send a FEN string to the client.
         public bool HasInitialised { get; private set; } = false;
@@ -27,6 +27,13 @@ namespace Checkers.board
         public SelectedPosition PositionSelected { get; set; }
 
         private readonly bool _isPlayer;
+
+        public enum Reply
+        {
+            NONE,
+            TRUE,
+            FALSE
+        }
 
         public struct SelectedPosition
         {
@@ -107,7 +114,6 @@ namespace Checkers.board
                         else
                             tile.Piece.CalculateRegularMoves().ForEach(position =>
                             {
-                                Console.WriteLine(position);
                                 ScreenManager.Board.Tiles[position].Color = Color.VIOLET;
                             });
                     }
@@ -137,17 +143,21 @@ namespace Checkers.board
         // Is public because server also needs to run this on another thread.
         public void AwaitReplyFromServer(Tile tile)
         {
-            while (!GotReply) ;
+            while (GotReply.Equals(Reply.NONE));
 
-            if (GotReply)
+            if (GotReply.Equals(Reply.TRUE))
             {
-                GotReply = false;
+                GotReply = Reply.FALSE;
                 ChangePosition(tile);
 
                 if (!_isPlayer)
                     Console.WriteLine($"SERVER: Changed position: {tile.GetPositionInTilesArray()}");
                 else
                     Console.WriteLine($"CLIENT: Changed position: {tile.GetPositionInTilesArray()}");
+            }
+            else if (GotReply.Equals(Reply.FALSE))
+            {
+                Console.WriteLine("Illegal move");
             }
         }
 
@@ -157,7 +167,7 @@ namespace Checkers.board
             // They wont ever be null but it removes all errors :)
             if (PositionSelected.Piece != null && PositionSelected.Tile != null)
             {
-                
+
                 //Manager.Move(PositionSelected.Piece, tile.GetPositionInTilesArray());
                 Tiles[tile.GetPositionInTilesArray()].Attach(PositionSelected.Piece);
                 PositionSelected.Tile.Detach();
@@ -185,7 +195,7 @@ namespace Checkers.board
             Manager = new PieceManager(this);
 
             Console.WriteLine($"FEN: {fen}");
-            if(_isPlayer)
+            if (_isPlayer)
                 Console.WriteLine("---------------EOL OF SETUP CLIENT-------------------\n");
             else
                 Console.WriteLine("---------------EOL OF SETUP SERVER-------------------\n");

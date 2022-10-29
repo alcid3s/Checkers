@@ -66,7 +66,7 @@ namespace Checkers.Screens
         {
             DrawTextureRec(_mrBean, _frameRec, _position, Color.WHITE);
             DrawText("Waiting for opponent to join...", (int)_position.X, GetScreenHeight() - 50, 40, Color.WHITE);
-            DrawText($"IP of server: {_ipAddress}, port: 1337", (int)_position.X + 20, GetScreenHeight() - 150, 40, Color.MAROON);
+            DrawText($"IP of server: {_ipAddress}, port: 1337", (int)_position.X -20, GetScreenHeight() - 150, 40, Color.MAROON);
         }
 
         public override void Update()

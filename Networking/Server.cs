@@ -18,7 +18,7 @@ namespace Checkers.Networking
 
         // Variables for networking.
         private readonly Socket _serverSocket;
-        public Client[] ClientList { get; private set; } = new Client[2];
+        private Client[] _clientList = new Client[2]; 
         private readonly short _port = 1337;
 
         private readonly Board _board;
@@ -72,24 +72,19 @@ namespace Checkers.Networking
                         // decides which side the player plays as.
                         Piece.Side side;
                         if (_whiteIsTaken)
-                        {
                             side = Piece.Side.Black;
-                            Console.WriteLine($"Client from {socket.RemoteEndPoint} plays as black");
-                        }
-                           
                         else
                         {
-                            Console.WriteLine("White is now taken");
                             side = Piece.Side.White;
                             _whiteIsTaken = true;
                         }
                             
 
                         Client client = new(socket, AmountOfPlayersActive, side);
-                        ClientList[AmountOfPlayersActive] = client;
+                        _clientList[AmountOfPlayersActive] = client;
                         AmountOfPlayersActive++;
 
-                        Console.WriteLine($"Amount of players is now: {AmountOfPlayersActive}");
+                        Console.WriteLine($"SERVER: Amount of players is now: {AmountOfPlayersActive}");
 
                         // Every client gets its own thread.
                         new Thread(() =>
@@ -103,10 +98,12 @@ namespace Checkers.Networking
 
         private void HandleClient(Client client)
         {
-            Console.WriteLine($"Client connection from: {client.Socket.RemoteEndPoint}");
+            Console.WriteLine($"SERVER: Client connection from: {client.Socket.RemoteEndPoint}");
 
             // Sends the basic setup to the client.
             SendBasicData(client);
+
+            Console.WriteLine("------------------EOL OF CLIENT 2-------------------");
             byte[] message = new byte[1024];
 
             while (client.Socket.Connected)
@@ -119,7 +116,7 @@ namespace Checkers.Networking
                     // If the player who has the turn also makes a move
                     if (client.Side.Equals(_board.Manager.WhoseTurn))
                     {
-                        Console.WriteLine($"DATA FROM CLIENT: {information}");
+                        Console.WriteLine($"SERVER: DATA FROM CLIENT: {information}");
 
                         (int, string, int) data = _board.ParseMessage(information);
 
@@ -138,10 +135,10 @@ namespace Checkers.Networking
                             client.Socket.Send(Encoding.UTF8.GetBytes("T"));
 
 
-                            foreach (Client c in ClientList)
+                            foreach (Client c in _clientList)
                             {
                                 // Send the newly made moves to the other client
-                                if (!c.Side.Equals(_board.Manager.WhoseTurn))
+                                if (!c.Equals(client)
                                 {
                                     Console.WriteLine($"SERVER: SENDING NEW POSITION TO {c.Socket.RemoteEndPoint}, NEW MESSAGE CONTAINS: {information}");
                                     client.Socket.Send(Encoding.UTF8.GetBytes(information));
@@ -161,7 +158,7 @@ namespace Checkers.Networking
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine($"Server Got error with Client {client.PlayerId}:\n{e}");
+                    Console.WriteLine($"Server got error with Client {client.PlayerId}:\n{e}");
                 }
             }
 
@@ -170,6 +167,7 @@ namespace Checkers.Networking
 
         private void SendBasicData(Client client)
         {
+            Console.WriteLine($"SERVER: Sending basic setup to {client.Socket.RemoteEndPoint}");
             if (client.Side.Equals(Piece.Side.White))
                 client.Socket.Send(Encoding.UTF8.GetBytes(_currentState + 'W'));
             else if(client.Side.Equals(Piece.Side.Black))

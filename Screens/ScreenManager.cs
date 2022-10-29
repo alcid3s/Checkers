@@ -93,14 +93,22 @@ namespace Checkers.Screens
                         _server = new Server(1337);
                         _server.Run();
                         _firstTimeRunBoard = false;
+
                         _client = new Client("127.0.0.1", 1337);
+
+                        // Gets FEN string from server
                         _client.Connect();
+
                         _firstTimeRunBoard = false;
                     }
+                    
                     else if (Board.HasFen != string.Empty && !Board.HasInitialised)
+                    {
                         Board.Init(Board.HasFen);
-
-                    else if (_server != null)
+                    }
+                        
+                    
+                    else if (_server != null && Board.HasInitialised)
                         if (Server.AmountOfPlayersActive != 2)
                         {
                             State = ScreenState.WaitState;
