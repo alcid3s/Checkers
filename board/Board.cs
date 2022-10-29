@@ -171,6 +171,7 @@ namespace Checkers.board
             {
                 Manager.Move(PositionSelected.Piece, tile.GetPositionInTilesArray());
 
+                // Used for FileIO
                 NewMove = PositionSelected.Tile.GetPositionInTilesArray() + ":" + typeof(Piece) + ":" + tile.GetPositionInTilesArray();
 
                 if (!_isPlayer)

@@ -68,7 +68,6 @@ namespace Checkers.Networking
                         {
                             (int, string, int) data = ScreenManager.Board.ParseMessage(response);
                             ScreenManager.Board.PositionSelected = new(ScreenManager.Board.Tiles[data.Item1], ScreenManager.Board.Tiles[data.Item1].Piece);
-
                             Console.WriteLine(data.Item1 + "-" + data.Item3);
                             ScreenManager.Board.ChangePosition(ScreenManager.Board.Tiles[data.Item3]);
                         }
