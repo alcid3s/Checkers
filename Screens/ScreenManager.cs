@@ -46,6 +46,7 @@ namespace Checkers.Screens
         private Client? _client = null;
 
         private bool _firstTimeRunBoard = true;
+        private bool _firstTimeRunHostOrJoin = true;
 
         public ScreenManager(Color backGround)
         {
@@ -62,7 +63,12 @@ namespace Checkers.Screens
                 case ScreenState.HostOrJoinState:
 
                     // New thread goes here because it comes after MainScreen, and mainscreen holds SaveData state.
-                    new Thread(SaveData).Start();
+                    if (_firstTimeRunHostOrJoin)
+                    {
+                        new Thread(SaveData).Start();
+                        _firstTimeRunHostOrJoin = false;
+                    }
+                    
 
                     _hostOrJoinScreen.Update();
                     break;
@@ -172,7 +178,10 @@ namespace Checkers.Screens
             if (!Directory.Exists(Path))
                 Directory.CreateDirectory(Path);
 
-            var sr = new StreamWriter(File.Create(Path + CreateFileName() + _suffix));
+            string fileName = CreateFileName();
+            Console.WriteLine(fileName);
+            var fs = File.Create(Path + fileName + _suffix);
+            var sr = new StreamWriter(fs);
 
             string currentInformation = string.Empty;
             // While the game isn't finished
@@ -191,7 +200,7 @@ namespace Checkers.Screens
 
         private string CreateFileName()
         {
-            return $"/Checkers_{DateTime.Now.Year}-{DateTime.Now.Month}-{DateTime.Now.Date}_{DateTime.Now.Hour}-{DateTime.Now.Minute}-{DateTime.Now.Second}";
+            return $"/Checkers_{DateTime.Now.Year}-{DateTime.Now.Month}-{DateTime.Now.Day}_{DateTime.Now.Hour}-{DateTime.Now.Minute}-{DateTime.Now.Second}";
         }
     }
 }
