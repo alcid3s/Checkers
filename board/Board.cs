@@ -157,9 +157,10 @@ namespace Checkers.board
             // They wont ever be null but it removes all errors :)
             if (PositionSelected.Piece != null && PositionSelected.Tile != null)
             {
-
+                
                 //Manager.Move(PositionSelected.Piece, tile.GetPositionInTilesArray());
-                Tiles[tile.GetPositionInTilesArray()].Attach(PositionSelected.Tile.Detach());
+                Tiles[tile.GetPositionInTilesArray()].Attach(PositionSelected.Piece);
+                PositionSelected.Tile.Detach();
 
                 PositionSelected = new(null, null);
 
@@ -206,7 +207,7 @@ namespace Checkers.board
                     }
                     else if (c.Equals(';'))
                         endOfFEN = true;
-                    else if (c == 'p' || c == ' ')
+                    else if (c == 'p' || c == 'P')
                     {
                         Piece piece;
                         // A substitute for the earlier used Dictionary.

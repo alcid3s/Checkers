@@ -20,8 +20,9 @@ namespace Checkers.Screens
             HostOrJoinState,
             HostState,
             JoinState,
+            WaitState,
             PlayState,
-            PlayStateWithServer
+            SetupServer
         }
 
         public static ScreenState State = ScreenState.MainScreenState;
@@ -33,6 +34,8 @@ namespace Checkers.Screens
         private HostOrJoinScreen _hostOrJoinScreen = new();
         private JoinScreen _joinScreen = new();
 
+        private WaitForPlayerScreen _waitScreen;
+
 
         private Server? _server = null;
         private Client? _client = null;
@@ -42,6 +45,10 @@ namespace Checkers.Screens
         public ScreenManager(Color backGround)
         {
             _backGround = backGround;
+            new Thread(() =>
+            {
+                _waitScreen = new WaitForPlayerScreen();
+            }).Start();
         }
         public override void Update()
         {
@@ -50,14 +57,23 @@ namespace Checkers.Screens
                 case ScreenState.MainScreenState:
                     _mainScreen.Update();
                     break;
+
                 case ScreenState.HostOrJoinState:
                     _hostOrJoinScreen.Update();
                     break;
+
                 case ScreenState.HostState:
                     break;
+
                 case ScreenState.JoinState:
                     _joinScreen.Update();
                     break;
+
+                case ScreenState.WaitState:
+                    if (_waitScreen.Ready)
+                        _waitScreen.Update();
+                    break;
+                    
                 case ScreenState.PlayState:
                     if (_firstTimeRunBoard)
                     {
@@ -70,7 +86,8 @@ namespace Checkers.Screens
                     else if(Board.HasInitialised)
                         Board.Update();
                     break;
-                case ScreenState.PlayStateWithServer:
+
+                case ScreenState.SetupServer:
                     if (_firstTimeRunBoard)
                     {
                         _server = new Server(1337);
@@ -82,8 +99,16 @@ namespace Checkers.Screens
                     }
                     else if (Board.HasFen != string.Empty && !Board.HasInitialised)
                         Board.Init(Board.HasFen);
-                    else if (Board.HasInitialised)
-                        Board.Update();
+
+                    else if (_server != null)
+                        if (Server.AmountOfPlayersActive != 2)
+                        {
+                            State = ScreenState.WaitState;
+                        }
+                            
+                        else
+                            State = ScreenState.PlayState;
+
                     break;
             }
         }
@@ -111,16 +136,20 @@ namespace Checkers.Screens
                     _joinScreen.Draw();
                     break;
 
+                case ScreenState.WaitState:
+                    ClearBackground(Color.RAYWHITE);
+                    if (_waitScreen.Ready)
+                        _waitScreen.Draw();
+                    break;
+
                 case ScreenState.PlayState:
                     ClearBackground(_backGround);
                     if(Board.HasInitialised)
                         Board.Draw();
                     break;
 
-                case ScreenState.PlayStateWithServer:
+                case ScreenState.SetupServer:
                     ClearBackground(_backGround);
-                    if(Board.HasInitialised)
-                        Board.Draw();
                     break;
             }
         }

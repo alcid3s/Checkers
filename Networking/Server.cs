@@ -18,13 +18,15 @@ namespace Checkers.Networking
 
         // Variables for networking.
         private readonly Socket _serverSocket;
-        private readonly Client[] _clientList = new Client[2];
+        public Client[] ClientList { get; private set; } = new Client[2];
         private readonly short _port = 1337;
 
         private readonly Board _board;
         private readonly string _currentState = string.Empty;
 
-        private struct Client
+        public static byte AmountOfPlayersActive { get; private set; } = 0;
+
+        public struct Client
         {
             public Piece.Side Side { get; private set; }
             public Socket Socket { get; }
@@ -57,7 +59,6 @@ namespace Checkers.Networking
         {
             new Thread(() =>
             {
-                byte amountOfPlayersActive = 0;
                 while (true)
                 {
                     // New incoming connection.
@@ -84,9 +85,11 @@ namespace Checkers.Networking
                         }
                             
 
-                        Client client = new(socket, amountOfPlayersActive, side);
-                        _clientList[amountOfPlayersActive] = client;
-                        amountOfPlayersActive++;
+                        Client client = new(socket, AmountOfPlayersActive, side);
+                        ClientList[AmountOfPlayersActive] = client;
+                        AmountOfPlayersActive++;
+
+                        Console.WriteLine($"Amount of players is now: {AmountOfPlayersActive}");
 
                         // Every client gets its own thread.
                         new Thread(() =>
@@ -120,8 +123,6 @@ namespace Checkers.Networking
 
                         (int, string, int) data = _board.ParseMessage(information);
 
-                        Console.WriteLine(data);
-
                         //Check if move player wants to do is legal.
                         if (_board.IsLegalMove(data.Item1, data.Item2, data.Item3))
                         {
@@ -137,12 +138,12 @@ namespace Checkers.Networking
                             client.Socket.Send(Encoding.UTF8.GetBytes("T"));
 
 
-                            foreach (Client c in _clientList)
+                            foreach (Client c in ClientList)
                             {
                                 // Send the newly made moves to the other client
                                 if (!c.Side.Equals(_board.Manager.WhoseTurn))
                                 {
-                                    Console.WriteLine($"SERVER: SENDING NEW POSITION TO {c.Socket.RemoteEndPoint}");
+                                    Console.WriteLine($"SERVER: SENDING NEW POSITION TO {c.Socket.RemoteEndPoint}, NEW MESSAGE CONTAINS: {information}");
                                     client.Socket.Send(Encoding.UTF8.GetBytes(information));
                                 }
                             }
