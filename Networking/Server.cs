@@ -12,18 +12,21 @@ namespace Checkers.Networking
 {
     public class Server
     {
+        // Used for setup.
         public static string Setup = "1p1p1p1p1p/p1p1p1p1p1/1p1p1p1p1p/p1p1p1p1p1/10/10/1P1P1P1P1P/P1P1P1P1P1/1P1P1P1P1P/P1P1P1P1P1;";
+        private bool _whiteIsTaken = false;
 
+        // Variables for networking.
         private readonly Socket _serverSocket;
-        private readonly Client[] _clientList = new Client[2];
-
+        private Client[] _clientList = new Client[2]; 
         private readonly short _port = 1337;
 
         private readonly Board _board;
         private readonly string _currentState = string.Empty;
 
-        private Piece.Side _whoHasTurn = Piece.Side.White;
-        private struct Client
+        public static byte AmountOfPlayersActive { get; private set; } = 0;
+
+        public struct Client
         {
             public Piece.Side Side { get; private set; }
             public Socket Socket { get; }
@@ -56,7 +59,6 @@ namespace Checkers.Networking
         {
             new Thread(() =>
             {
-                byte amountOfPlayersActive = 0;
                 while (true)
                 {
                     // New incoming connection.
@@ -64,24 +66,25 @@ namespace Checkers.Networking
                     if (_serverSocket != null)
                         socket = _serverSocket.Accept();
 
-                    // Used to decide who plays as who.
-                    bool whiteIsTaken = false;
-                    if (_clientList.Length == 1)
-                        whiteIsTaken = true;
-
                     // saving client to list if the socket of the client is not null.
                     if (socket != null)
                     {
                         // decides which side the player plays as.
                         Piece.Side side;
-                        if (whiteIsTaken)
+                        if (_whiteIsTaken)
                             side = Piece.Side.Black;
                         else
+                        {
                             side = Piece.Side.White;
+                            _whiteIsTaken = true;
+                        }
+                            
 
-                        Client client = new(socket, amountOfPlayersActive, side);
-                        _clientList[amountOfPlayersActive] = client;
-                        amountOfPlayersActive++;
+                        Client client = new(socket, AmountOfPlayersActive, side);
+                        _clientList[AmountOfPlayersActive] = client;
+                        AmountOfPlayersActive++;
+
+                        Console.WriteLine($"SERVER: Amount of players is now: {AmountOfPlayersActive}");
 
                         // Every client gets its own thread.
                         new Thread(() =>
@@ -95,10 +98,12 @@ namespace Checkers.Networking
 
         private void HandleClient(Client client)
         {
-            Console.WriteLine($"Client connection from: {client.Socket.RemoteEndPoint}");
+            Console.WriteLine($"SERVER: Client connection from: {client.Socket.RemoteEndPoint}, size of list is now {_clientList.Length}");
 
             // Sends the basic setup to the client.
             SendBasicData(client);
+
+            Console.WriteLine("------------------EOL OF CLIENT 2-------------------");
             byte[] message = new byte[1024];
 
             while (client.Socket.Connected)
@@ -109,54 +114,42 @@ namespace Checkers.Networking
                     string information = Encoding.UTF8.GetString(message, 0, receive);
 
                     // If the player who has the turn also makes a move
-                    //if (client.Side.Equals(_whoHasTurn))        {
-                    Console.WriteLine($"DATA FROM CLIENT: {information}");
-            
-                    (int, string, int) data = ParseMessage(information);
-
-                    Console.WriteLine(data);
-
-                    //Check if move player wants to do is legal.
-                    if (_board.IsLegalMove(data.Item1, data.Item2, data.Item3))
+                    if (client.Side.Equals(_board.Manager.WhoseTurn))
                     {
-                        _board.PositionSelected = new(_board.Tiles[data.Item1], _board.Tiles[data.Item1].Piece);
+                        Console.WriteLine($"SERVER: DATA FROM CLIENT: {information}");
 
-                        // This thread makes sure the piece also gets moved on the board the server holds.
-                        new Thread(() =>
+                        (int, string, int) data = _board.ParseMessage(information);
+
+                        //Check if move player wants to do is legal.
+                        if (_board.IsLegalMove(data.Item1, data.Item2, data.Item3))
                         {
-                            _board.AwaitReplyFromServer(_board.Tiles[data.Item3]);
-                        }).Start();
+                            _board.PositionSelected = new(_board.Tiles[data.Item1], _board.Tiles[data.Item1].Piece);
 
-                        // The move was legal so this updates the board for server and client that sended the information.
-                        client.Socket.Send(Encoding.UTF8.GetBytes("T"));
-                        _board.GotReply = true;
-
-                        foreach (Client c in _clientList)
-                        {
-                            // Send the newly made moves to the other client
-                            if (!c.Side.Equals(_whoHasTurn))
+                            // This thread makes sure the piece also gets moved on the board the server holds.
+                            new Thread(() =>
                             {
-                                client.Socket.Send(Encoding.UTF8.GetBytes(information));
-                            }
+                                _board.ChangePosition(_board.Tiles[data.Item3]);
+                            }).Start();
+
+                            // The move was legal so this updates the board for server and client that sended the information.
+                            client.Socket.Send(Encoding.UTF8.GetBytes("T"));
+                            Client[] clients = _clientList.Where(x => !x.Equals(client)).ToList().ToArray();
+                            clients[0].Socket.Send(Encoding.UTF8.GetBytes(information));
+
+                            information = string.Empty;
+
+                            // Change turn to other party.
+                            _board.Manager.ToggleTurns();
                         }
-
-                        information = string.Empty;
-
-                        // Change turn to other party.
-                        if (_whoHasTurn.Equals(Piece.Side.White))
-                            _whoHasTurn = Piece.Side.Black;
-                        else if (_whoHasTurn.Equals(Piece.Side.Black))
-                            _whoHasTurn = Piece.Side.White;
+                        else
+                        {
+                            client.Socket.Send(Encoding.UTF8.GetBytes("F"));
+                        }
                     }
-                    else
-                    {
-                        client.Socket.Send(Encoding.UTF8.GetBytes("F"));
-                    }
-                    //}
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine($"Server Got error with Client {client.PlayerId}:\n{e}");
+                    Console.WriteLine($"Server got error with Client {client.PlayerId}:\n{e}");
                 }
             }
 
@@ -167,23 +160,8 @@ namespace Checkers.Networking
         {
             if (client.Side.Equals(Piece.Side.White))
                 client.Socket.Send(Encoding.UTF8.GetBytes(_currentState + 'W'));
-            else
+            else if(client.Side.Equals(Piece.Side.Black))
                 client.Socket.Send(Encoding.UTF8.GetBytes(_currentState + 'B'));
-        }
-
-        private (int, string, int) ParseMessage(string message)
-        {
-            string[] data = message.Split(':');
-
-            int currentPosition = int.Parse(data[0]);
-
-            data[2] = data[2].Replace(';', ' ');
-            data[2] = data[2].Trim();
-
-            int futurePosition = int.Parse(data[2]);
-            string typeOfPiece = data[1];
-
-            return (currentPosition, typeOfPiece, futurePosition);
         }
     }
 }
