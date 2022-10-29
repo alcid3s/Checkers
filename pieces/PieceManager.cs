@@ -77,8 +77,7 @@ namespace Checkers.pieces
             return true;
         }
 
-        // TODO: Can make private as soon as Move has been implemented
-        public void ToggleTurns()
+        private void ToggleTurns()
         {
            
             LastCapturer = null;

@@ -95,7 +95,7 @@ namespace Checkers.board
                     Console.WriteLine($"X: {tile.PositionOnBoard.X}, Y: {tile.PositionOnBoard.Y}");
 
                     // if the tile contains a piece and the piece is of the same side as the player.
-                    if (tile.Piece != null && /*tile.Piece.SideOfPiece.Equals(_sideOfPlayer) &&*/ Manager.LegalPieces().Contains(tile.Piece))
+                    if (tile.Piece != null && tile.Piece.SideOfPiece.Equals(_sideOfPlayer) && Manager.LegalPieces().Contains(tile.Piece))
                     {
                         // The piece is selected.
                         PositionSelected = new(tile, tile.Piece);
