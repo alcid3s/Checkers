@@ -49,7 +49,6 @@ namespace Checkers.Networking
             {
                 while (_socket.Connected)
                 {
-
                     byte[] message = new byte[1024];
                     _socket.Receive(message);
                     string response = Encoding.UTF8.GetString(message);

@@ -23,6 +23,7 @@ namespace Checkers
 
             ScreenManager manager = new ScreenManager(Color.LIME);
 
+            SetTargetFPS(60);
             while (!WindowShouldClose())
             {
                 BeginDrawing();
