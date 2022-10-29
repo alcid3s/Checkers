@@ -26,6 +26,7 @@ namespace Checkers.Networking
 
         public void Connect()
         {
+            Console.WriteLine("CLIENT: CONNECTING  WITH SERVER");
             IPEndPoint endPoint = new(_address, _port);
             _socket = new Socket(_address.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
 
@@ -44,9 +45,10 @@ namespace Checkers.Networking
         private void Listen()
         {
             bool firstMessage = true;
-            while (true)
+            Console.WriteLine("CLIENT: LISTENING");
+            if (_socket != null)
             {
-                if(_socket != null)
+                while (true)
                 {
                     byte[] message = new byte[1024];
                     _socket.Receive(message);
@@ -61,13 +63,23 @@ namespace Checkers.Networking
                     }
                     else
                     {
-                        if (response.Contains("T"))
+                        // If a response is an update on the current position of the opposite player.
+                        if (response.Contains(":"))
                         {
-                            ScreenManager.Board.GotReply = true;
+                            (int, string, int) data = ScreenManager.Board.ParseMessage(response);
+                            ScreenManager.Board.PositionSelected = new(ScreenManager.Board.Tiles[data.Item1], ScreenManager.Board.Tiles[data.Item1].Piece);
+                            ScreenManager.Board.ChangePosition(ScreenManager.Board.Tiles[data.Item3]);
                         }
-                        else if(response.Contains("F"))
+
+                        // If your own move has been validated
+                        else if (response.Contains("T"))
                         {
-                            ScreenManager.Board.GotReply = false;
+                            ScreenManager.Board.GotReply = board.Board.Reply.TRUE;
+                        }
+                        else if (response.Contains("F"))
+                        {
+                            // Gives deadlock condition. Needs Change
+                            ScreenManager.Board.GotReply = board.Board.Reply.FALSE;
                         }
                     }
                 }

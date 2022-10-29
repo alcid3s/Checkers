@@ -30,7 +30,7 @@ namespace Checkers.Screens
 
             _hostbtn.OnAction += delegate
             {
-                ScreenManager.State = ScreenManager.ScreenState.PlayStateWithServer;
+                ScreenManager.State = ScreenManager.ScreenState.SetupServer;
             };
 
             _joinbtn.OnAction += delegate

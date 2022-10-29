@@ -77,7 +77,8 @@ namespace Checkers.pieces
             return true;
         }
 
-        private void ToggleTurns()
+        // TODO: Can make private as soon as Move has been implemented
+        public void ToggleTurns()
         {
             LastCapturer = null;
 
@@ -87,7 +88,7 @@ namespace Checkers.pieces
                 WhoseTurn = Piece.Side.White;
             else
             {
-                throw new Exception("We done goofed on the turn toggling");
+                throw new Exception("error concerning Piece.Side on the Toggle method. Neither Black or White");
             }
         }
     }

@@ -10,7 +10,7 @@ namespace Checkers.board
     public class Board
     {
         // Used for when the server sends a message to the client.
-        public bool GotReply { get; set; } = false;
+        public Reply GotReply { get; set; } = Reply.NONE;
 
         // bool and string are used so the server can send a FEN string to the client.
         public bool HasInitialised { get; private set; } = false;
@@ -27,6 +27,13 @@ namespace Checkers.board
         public SelectedPosition PositionSelected { get; set; }
 
         private readonly bool _isPlayer;
+
+        public enum Reply
+        {
+            NONE,
+            TRUE,
+            FALSE
+        }
 
         public struct SelectedPosition
         {
@@ -107,7 +114,6 @@ namespace Checkers.board
                         else
                             tile.Piece.CalculateRegularMoves().ForEach(position =>
                             {
-                                Console.WriteLine(position);
                                 ScreenManager.Board.Tiles[position].Color = Color.VIOLET;
                             });
                     }
@@ -137,23 +143,38 @@ namespace Checkers.board
         // Is public because server also needs to run this on another thread.
         public void AwaitReplyFromServer(Tile tile)
         {
-            if(_isPlayer)
-                Console.WriteLine("CLIENT: Awaiting change in board");
+            while (GotReply.Equals(Reply.NONE)) ;
 
-            while (!GotReply) ;
-
-            if(_isPlayer)
-                Console.WriteLine($"CLIENT: GOTREPLY IS NOW {GotReply}");
-
-            if (GotReply)
+            if (GotReply.Equals(Reply.TRUE))
             {
-                if(_isPlayer)
-                    Console.WriteLine("CLIENT: GOTREPLY IS NOW STILL T");
+                GotReply = Reply.FALSE;
+                ChangePosition(tile);
 
-                GotReply = false;
+                if (!_isPlayer)
+                    Console.WriteLine($"SERVER: Changed position: {tile.GetPositionInTilesArray()}");
+                else
+                    Console.WriteLine($"CLIENT: Changed position: {tile.GetPositionInTilesArray()}");
+            }
+            else if (GotReply.Equals(Reply.FALSE))
+            {
+                Console.WriteLine("Illegal move");
+            }
+        }
 
-                // They wont every be null but it removes all errors :)
-                if(PositionSelected.Piece != null && PositionSelected.Tile != null)
+        // Public so Client.cs can make use of it as well.
+        public void ChangePosition(Tile tile)
+        {
+            // They wont ever be null but it removes all errors :)
+            if (PositionSelected.Piece != null && PositionSelected.Tile != null)
+            {
+
+                //Manager.Move(PositionSelected.Piece, tile.GetPositionInTilesArray());
+                Tiles[tile.GetPositionInTilesArray()].Attach(PositionSelected.Piece);
+                PositionSelected.Tile.Detach();
+
+                PositionSelected = new(null, null);
+
+                foreach (Tile t in Tiles)
                 {
                     //Tiles[tile.GetPositionInTilesArray()].Attach(PositionSelected.Tile.Detach());
 
@@ -177,8 +198,6 @@ namespace Checkers.board
                         t.ResetColor();
                     }
                 }
-                if(!_isPlayer)
-                    Console.WriteLine("------------------------------");
             }
         }
 
@@ -196,7 +215,7 @@ namespace Checkers.board
             Manager = new PieceManager(this);
 
             Console.WriteLine($"FEN: {fen}");
-            
+
 
             int x = 0, y = 0;
             bool endOfFEN = false;
@@ -215,12 +234,11 @@ namespace Checkers.board
                     }
                     else if (c.Equals(';'))
                         endOfFEN = true;
-                    else if(c == 'p' || c == 'P')
+                    else if (c == 'p' || c == 'P')
                     {
                         Piece piece;
-
                         // A substitute for the earlier used Dictionary.
-                        if(c == 'p')
+                        if (c == 'p')
                             piece = new ManPiece(Piece.Side.Black);
                         else
                             piece = new ManPiece(Piece.Side.White);
@@ -243,13 +261,18 @@ namespace Checkers.board
                 }
             }
 
-            foreach(Tile tile in Tiles)
+            foreach (Tile tile in Tiles)
             {
-                if(tile.Piece != null)
+                if (tile.Piece != null)
                 {
                     tile.Piece.CurrentPosition = tile;
                 }
             }
+
+            if (_isPlayer)
+                Console.WriteLine("---------------EOL OF SETUP CLIENT-------------------\n");
+            else
+                Console.WriteLine("---------------EOL OF SETUP SERVER-------------------\n");
 
             HasInitialised = true;
         }
@@ -257,7 +280,6 @@ namespace Checkers.board
         // This method should only be used by the server to verify if the move is legal.
         public bool IsLegalMove(int currentPosition, string typeOfPiece, int futurePosition)
         {
-            
             if (!_isPlayer)
             {
                 Console.WriteLine($"SERVER: currentpos: {currentPosition} and containspiece = {Tiles[currentPosition].Piece != null}");
@@ -276,7 +298,22 @@ namespace Checkers.board
                 }
             }
             return false;
-            
+        }
+
+        // Parses information the server sends, server also uses this to parse the message the client sends. For changes in message structure change this method.
+        public (int, string, int) ParseMessage(string message)
+        {
+            string[] data = message.Split(':');
+
+            int currentPosition = int.Parse(data[0]);
+
+            data[2] = data[2].Replace(';', ' ');
+            data[2] = data[2].Trim();
+
+            int futurePosition = int.Parse(data[2]);
+            string typeOfPiece = data[1];
+
+            return (currentPosition, typeOfPiece, futurePosition);
         }
     }
 }
