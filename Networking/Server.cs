@@ -117,7 +117,7 @@ namespace Checkers.Networking
                     //if (client.Side.Equals(_whoHasTurn))        {
                     Console.WriteLine($"DATA FROM CLIENT: {information}");
             
-                    (int, string, int) data = ParseMessage(information);
+                    (int, string, int) data = _board.ParseMessage(information);
 
                     Console.WriteLine(data);
 
@@ -135,7 +135,7 @@ namespace Checkers.Networking
                         */
                         // The move was legal so this updates the board for server and client that sended the information.
                         client.Socket.Send(Encoding.UTF8.GetBytes("T"));
-                        _board.GotReply = true;
+                        _board.GotReply = Board.Reply.TRUE;
 
                         foreach (Client c in _clientList)
                         {
@@ -152,13 +152,14 @@ namespace Checkers.Networking
                             Client[] clients = _clientList.Where(x => !x.Equals(client)).ToList().ToArray();
                             clients[0].Socket.Send(Encoding.UTF8.GetBytes(information));
 
-                        // Change turn to other party.
-                        /*
-                        if (_whoHasTurn.Equals(Piece.Side.White))
-                            _whoHasTurn = Piece.Side.Black;
-                        else if (_whoHasTurn.Equals(Piece.Side.Black))
-                            _whoHasTurn = Piece.Side.White;
-                        */
+                            // Change turn to other party.
+                            /*
+                            if (_whoHasTurn.Equals(Piece.Side.White))
+                                _whoHasTurn = Piece.Side.Black;
+                            else if (_whoHasTurn.Equals(Piece.Side.Black))
+                                _whoHasTurn = Piece.Side.White;
+                            */
+                        }
                     }
                 }
                 catch (Exception e)

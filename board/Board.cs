@@ -193,10 +193,7 @@ namespace Checkers.board
                     }
                     PositionSelected = new(null, null);
 
-                    foreach(Tile t in Tiles)
-                    {
-                        t.ResetColor();
-                    }
+                    t.ResetColor();
                 }
             }
         }
