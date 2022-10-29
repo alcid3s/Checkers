@@ -44,10 +44,12 @@ namespace Checkers.Networking
         private void Listen()
         {
             bool firstMessage = true;
-            while (true)
+
+            if (_socket != null)
             {
-                if(_socket != null)
+                while (_socket.Connected)
                 {
+
                     byte[] message = new byte[1024];
                     _socket.Receive(message);
                     string response = Encoding.UTF8.GetString(message);
@@ -61,11 +63,20 @@ namespace Checkers.Networking
                     }
                     else
                     {
-                        if (response.Contains("T"))
+                        // If a response is an update on the current position of the opposite player.
+                        if (response.Contains(":"))
+                        {
+                            (int, string, int) data = ScreenManager.Board.ParseMessage(response);
+                            ScreenManager.Board.PositionSelected = new(ScreenManager.Board.Tiles[data.Item1], ScreenManager.Board.Tiles[data.Item1].Piece);
+                            ScreenManager.Board.ChangePosition(ScreenManager.Board.Tiles[data.Item3]);
+                        }
+
+                        // If your own move has been validated
+                        else if (response.Contains("T"))
                         {
                             ScreenManager.Board.GotReply = true;
                         }
-                        else if(response.Contains("F"))
+                        else if (response.Contains("F"))
                         {
                             ScreenManager.Board.GotReply = false;
                         }

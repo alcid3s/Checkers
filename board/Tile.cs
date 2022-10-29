@@ -38,7 +38,7 @@ namespace Checkers.board
 
         public void Attach(Piece piece)
         {
-            this.Piece = piece;
+            Piece = piece;
             piece.CurrentPosition = this;
         }
 
