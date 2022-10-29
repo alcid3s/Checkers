@@ -48,22 +48,30 @@ namespace Checkers.Screens
 
             _enter.OnAction += delegate
             {
-                string ip = string.Empty;
-                for(int i = 0; i < _ipAddress.Index; i++)
+                if (Ip.Equals(string.Empty) && Port == 0 || Ip.Equals("127.0.0.1") && Port == 1337)
                 {
-                    ip += _ipAddress.Text[i];
-                }
-                Ip = ip;
-                Ip = Ip.Trim();
-
-                try
-                {
-                    Port = int.Parse(_port.Text);
+                    Ip = "127.0.0.1";
+                    Port = 1337;
                     ScreenManager.State = ScreenManager.ScreenState.PlayState;
                 }
-                catch (Exception e)
+                else
                 {
-                    Console.WriteLine(e);
+                    string ip = string.Empty;
+                    for (int i = 0; i < _ipAddress.Index; i++)
+                    {
+                        ip += _ipAddress.Text[i];
+                    }
+                    Ip = ip;
+                    Ip = Ip.Trim();
+                    try
+                    {
+                        Port = int.Parse(_port.Text);
+                        ScreenManager.State = ScreenManager.ScreenState.PlayState;
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine(e);
+                    }
                 }
             };
         }
