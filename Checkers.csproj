@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -8,7 +8,17 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="UnitTests\**" />
+    <EmbeddedResource Remove="UnitTests\**" />
+    <None Remove="UnitTests\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Raylib-cs" Version="4.2.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="SavedGames\" />
   </ItemGroup>
 
 </Project>

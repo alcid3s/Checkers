@@ -1,78 +1,336 @@
-﻿using Raylib_cs;
-using static Raylib_cs.Raylib;
-using static Raylib_cs.Color;
+﻿using Checkers.Networking;
+using Checkers.pieces;
+using Checkers.Screens;
+using Raylib_cs;
+using System.ComponentModel;
+
 using System.Numerics;
+using static Raylib_cs.Raylib;
 
 namespace Checkers.board
 {
     public class Board
     {
-        private Tile[] _tiles = new Tile[100];
-        private bool _dark;
+        // Used for when the server sends a message to the client.
+        public Reply GotReply { get; set; } = Reply.NONE;
 
-        private static Texture2D _whiteTile = LoadTexture("../../../res/Tile1.png");
-        private static Texture2D _darkTile = LoadTexture("../../../res/Tile2.png");
+        // bool and string are used so the server can send a FEN string to the client.
+        public bool HasInitialised { get; private set; } = false;
+        public string HasFen { get; set; } = string.Empty;
 
-        public Board()
+        // Used to create the board.
+        public Tile[] Tiles { get; private set; } = new Tile[100];
+
+        public PieceManager Manager { get; private set; }
+
+        private const int sizeOfSquare = 96;
+
+        private Piece.Side _sideOfPlayer;
+        public SelectedPosition PositionSelected { get; set; }
+
+        // Used for FileIO
+        public string NewMove { get; set; } = string.Empty;
+
+        public Piece.Side SideThatWon { get; private set; } = Piece.Side.None;
+
+        private readonly bool _isPlayer;
+        public enum Reply
         {
-            _dark = false;
+            NONE,
+            TRUE,
+            FALSE
+        }
+
+        public struct SelectedPosition
+        {
+            public Tile? Tile { get; set; }
+            public Piece? Piece { get; set; }
+
+            public SelectedPosition(Tile? tile, Piece? piece)
+            {
+                Tile = tile;
+                Piece = piece;
+            }
+        }
+
+        public Board(bool isPlayer)
+        {
+            bool dark = true;
             for (int y = 0; y < 10; y++)
             {
                 // So not every rank has the same color
-                _dark = !_dark;
+                dark = !dark;
 
                 for (int x = 0; x < 10; x++)
                 {
                     // Console.WriteLine($"Count: {y * 10 + x}");
-                    if (_dark)
-                        _tiles[y * 10 + x] = new Tile(_whiteTile, _whiteTile.width * x, _whiteTile.height * y, _dark);
+                    if (dark)
+                        Tiles[y * 10 + x] = new Tile(x * sizeOfSquare, y * sizeOfSquare, sizeOfSquare, dark);
                     else
-                        _tiles[y * 10 + x] = new Tile(_darkTile, _darkTile.width * x, _darkTile.height * y, _dark);
+                        Tiles[y * 10 + x] = new Tile(x * sizeOfSquare, y * sizeOfSquare, sizeOfSquare, dark);
 
                     // So the next Tile has the opposite color
-                    _dark = !_dark;
+                    dark = !dark;
                 }
             }
+            _isPlayer = isPlayer;
         }
 
         public void Draw()
         {
-            foreach (Tile tile in _tiles)
+            foreach (Tile tile in Tiles)
             {
                 tile.Draw();
             }
         }
 
+        public void Update()
+        {
+            if (IsMouseButtonPressed(MouseButton.MOUSE_BUTTON_LEFT))
+            {
+                OnClick(GetMousePosition());
+            }
+        }
+
+        private async void OnClick(Vector2 position)
+        {
+            foreach (Tile tile in Tiles)
+            {
+                if (tile.OnClick(position))
+                {
+                    Console.WriteLine($"X: {tile.PositionOnBoard.X}, Y: {tile.PositionOnBoard.Y}");
+
+                    // if the tile contains a piece and the piece is of the same side as the player.
+                    if (tile.Piece != null && tile.Piece.SideOfPiece.Equals(_sideOfPlayer) && Manager.LegalPieces().Contains(tile.Piece))
+                    {
+                        // The piece is selected.
+                        PositionSelected = new(tile, tile.Piece);
+
+                        // Will change color of all tiles on which the piece can move.
+                        HighlightTile();
+                    }
+
+                    // If the player already selected a position and presses on a tile without a piece on it.
+                    else if (tile.Piece == null && PositionSelected.Tile != null && PositionSelected.Piece != null)
+                    {
+                        List<int> legalMoves = PositionSelected.Piece.CalculateForcingMoves();
+                        if (legalMoves.Count == 0)
+                            legalMoves = PositionSelected.Piece.CalculateRegularMoves();
+
+                        // if the tile clicked is a legal move for the piece.
+                        if (legalMoves.Contains(tile.GetPositionInTilesArray()))
+                        {
+                            SendToServer(tile);
+
+                            // awaits reply from server
+                            await AwaitReplyFromServer(tile);
+                        }
+                        else
+                            HighlightUsablePieces();
+                    }
+                }
+            }
+
+        }
+
+        // Is public because server also needs to run this on another thread.
+        public Task AwaitReplyFromServer(Tile tile)
+        {
+            while (GotReply.Equals(Reply.NONE)) ;
+
+            if (GotReply.Equals(Reply.TRUE))
+            {
+                GotReply = Reply.NONE;
+                ChangePosition(tile);
+
+                //if (!_isPlayer)
+                //    Console.WriteLine($"SERVER: Changed position: {tile.GetPositionInTilesArray()}");
+                //else
+                //    Console.WriteLine($"CLIENT: Changed position: {tile.GetPositionInTilesArray()}");
+            }
+            else if (GotReply.Equals(Reply.FALSE))
+            {
+                Console.WriteLine("Illegal move");
+            }
+            return Task.CompletedTask;
+        }
+
+        // Public so Client.cs can make use of it as well.
+        public void ChangePosition(Tile tile)
+        {
+            // They wont ever be null but it removes all errors :)
+            if (PositionSelected.Piece != null && PositionSelected.Tile != null)
+            {
+                Manager.Move(PositionSelected.Piece, tile.GetPositionInTilesArray());
+
+                // Used for FileIO
+                NewMove = PositionSelected.Tile.GetPositionInTilesArray() + ":" + typeof(Piece) + ":" + tile.GetPositionInTilesArray();
+
+                //if (!_isPlayer)
+                //    Console.WriteLine($"SERVER: NEW POSITION FOR PIECE: {tile.GetPositionInTilesArray()}");
+
+                //if (_isPlayer)
+                //    Console.WriteLine($"CLIENT: NEW POS = {tile.GetPositionInTilesArray()}");
+
+                PositionSelected = new(null, null);
+                UpdateBoardState();
+
+                if (Manager.LastCapturer != null && Manager.WhoseTurn == _sideOfPlayer)
+                {
+                    PositionSelected = new(Manager.LastCapturer.CurrentPosition, Manager.LastCapturer);
+                    HighlightTile();
+                }
+                else
+                    HighlightUsablePieces();
+            }
+        }
+
+        public void ResetTileColors()
+        {
+            foreach (Tile t in Tiles)
+            {
+                t.ResetColor();
+            }
+        }
+
+        public void HighlightTile()
+        {
+            ResetTileColors();
+            if (PositionSelected.Piece.CalculateForcingMoves().Count > 0)
+            {
+                PositionSelected.Tile.BlendColor(new Color(0xFF, 0x80, 0x80, 0xFF));
+                PositionSelected.Piece.CalculateForcingMoves().ForEach(position =>
+                {
+                    ScreenManager.Board.Tiles[position].BlendColor(new Color(0xFF, 0x00, 0x00, 0xFF));
+                });
+            }
+            else if (PositionSelected.Piece.CalculateRegularMoves().Count > 0)
+            {
+                PositionSelected.Tile.BlendColor(new Color(0x80, 0xC0, 0xFF, 0xFF));
+                PositionSelected.Piece.CalculateRegularMoves().ForEach(position =>
+                {
+                    ScreenManager.Board.Tiles[position].BlendColor(new Color(0x00, 0x80, 0xFF, 0xFF));
+                });
+            }
+        }
+
+        public void UpdateBoardState()
+        {
+            if (!_isPlayer)
+            {
+                if (Manager.LegalPieces().Count != 0)
+                    return;
+
+                if (Manager.WhoseTurn == Piece.Side.White)
+                    SideThatWon = Piece.Side.Black;
+                else if (Manager.WhoseTurn == Piece.Side.Black)
+                    SideThatWon = Piece.Side.White;
+            }
+        }
+
+        public void HighlightUsablePieces()
+        {
+            ResetTileColors();
+            if (Manager.WhoseTurn != _sideOfPlayer)
+                return;
+
+            foreach (Piece piece in Manager.LegalPieces())
+            {
+                piece.CurrentPosition.BlendColor(new Color(0xA0, 0x80, 0xFF, 0xFF));
+            }
+        }
+
+        private void SendToServer(Tile tile)
+        {
+            if (PositionSelected.Tile != null)
+            {
+                string message = $"{PositionSelected.Tile.GetPositionInTilesArray()}:{typeof(Piece)}:{tile.GetPositionInTilesArray()};";
+                Client.Send(message);
+            }
+        }
+
         public void Init(string fen)
         {
-            Console.WriteLine($"FEN: {fen}");
-            var dict = new Dictionary<char, Piece>()
-            {
-                ['P'] = new Piece(Piece.Side.Red),
-                ['p'] = new Piece(Piece.Side.Black)
-            };
+            Manager = new PieceManager(this);
+
+            // Console.WriteLine($"FEN: {fen}");
+
 
             int x = 0, y = 0;
+            bool endOfFEN = false;
             foreach (char c in fen)
             {
-                if (c == '/')
+                if (!endOfFEN)
                 {
-                    x = 0;
-                    y++;
-                }
-                else if (char.IsDigit(c))
-                {
-                    x += (int)Char.GetNumericValue(c);
+                    if (c == '/')
+                    {
+                        x = 0;
+                        y++;
+                    }
+                    else if (char.IsDigit(c))
+                    {
+                        x += (int)Char.GetNumericValue(c);
+                    }
+                    else if (c.Equals(';'))
+                        endOfFEN = true;
+                    else if (c == 'p' || c == 'P')
+                    {
+                        Piece piece;
+                        // A substitute for the earlier used Dictionary.
+                        if (c == 'p')
+                            piece = new ManPiece(Piece.Side.Black);
+                        else
+                            piece = new ManPiece(Piece.Side.White);
+
+                        // Gets tile on which a piece needs to spawn.
+                        Tiles[(y * 10) + x].Attach(piece);
+                        x++;
+                    }
                 }
                 else
                 {
-                    Piece piece = dict[c];
-
-                    // Gets tile on which a piece needs to spawn.
-                    _tiles[(y * 10) + x].Attach(piece);
-                    x++;
+                    if (c == 'W')
+                    {
+                        _sideOfPlayer = Piece.Side.White;
+                    }
+                    else if (c == 'B')
+                    {
+                        _sideOfPlayer = Piece.Side.Black;
+                    }
                 }
             }
+
+            foreach (Tile tile in Tiles)
+            {
+                if (tile.Piece != null)
+                {
+                    tile.Piece.CurrentPosition = tile;
+                }
+            }
+
+            HighlightUsablePieces();
+            //if (_isPlayer)
+            //    Console.WriteLine("---------------EOL OF SETUP CLIENT-------------------\n");
+            //else
+            //    Console.WriteLine("---------------EOL OF SETUP SERVER-------------------\n");
+
+            HasInitialised = true;
+        }
+
+        // Parses information the server sends, server also uses this to parse the message the client sends. For changes in message structure change this method.
+        public static (int, string, int) ParseMessage(string message)
+        {
+            string[] data = message.Split(':');
+
+            int currentPosition = int.Parse(data[0]);
+
+            data[2] = data[2].Replace(';', ' ');
+            data[2] = data[2].Trim();
+
+            int futurePosition = int.Parse(data[2]);
+            string typeOfPiece = data[1];
+
+            return (currentPosition, typeOfPiece, futurePosition);
         }
     }
 }

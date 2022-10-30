@@ -1,14 +1,20 @@
 ﻿using Checkers.board;
+using Checkers.Custom;
+using Checkers.graphics;
+using Checkers.pieces;
+using Checkers.Screens;
 using Raylib_cs;
 using static Raylib_cs.Raylib;
 using static Raylib_cs.TraceLogLevel;
 
 namespace Checkers
 {
-    internal class Program
+    public class Program
     {
-        public static string Setup = "1p1p1p1p1p/p1p1p1p1p1/1p1p1p1p1p/p1p1p1p1p1/10/10/1P1P1P1P1P/P1P1P1P1P1/1P1P1P1P1P/P1P1P1P1P1";
-        static void Main(string[] args)
+        public static Texture2D MrBeanSprite;
+        public static Texture2D WonSprite;
+        public static Texture2D LostSprite;
+        public static void Main()
         {
             SetTraceLogLevel(LOG_NONE);
 
@@ -16,16 +22,26 @@ namespace Checkers
             const int screenHeight = 960;
             InitWindow(screenWidth, screenHeight, "Checkers");
 
-            Board board = new();
-            board.Init(Setup);
+            MrBeanSprite = LoadTexture("../../../res/MrBeanSprite.png");
+            WonSprite = LoadTexture("../../../res/WonSprite.png");
+            LostSprite = LoadTexture("../../../res/LostSprite.png");
 
+            Piece.GetTextures();
+
+            SetTraceLogLevel(LOG_NONE);
+
+            ScreenManager manager = new ScreenManager(Color.LIME);
+
+            SetTargetFPS(60);
             while (!WindowShouldClose())
             {
                 BeginDrawing();
-                ClearBackground(Color.RAYWHITE);
-                board.Draw();
+                manager.Update();
+                manager.Draw();
                 EndDrawing();
             }
+
+            CloseWindow();
         }
     }
 }
