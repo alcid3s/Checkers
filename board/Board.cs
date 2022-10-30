@@ -2,7 +2,8 @@
 using Checkers.pieces;
 using Checkers.Screens;
 using Raylib_cs;
-using System.ComponentModel;
+using System.ComponentModel;
+
 using System.Numerics;
 using static Raylib_cs.Raylib;
 
@@ -208,28 +209,50 @@ namespace Checkers.board
             }
         }
 
-        public void UpdateBoardState()
-        {
-            int white = 0;
-            int black = 0;
-
-            foreach (Tile t in Tiles)
-            {
-                t.ResetColor();
-                if (t.Piece != null && !_isPlayer)
-                {
-                    if (t.Piece.SideOfPiece.Equals(Piece.Side.White))
-                        white++;
-                    else if (t.Piece.SideOfPiece.Equals(Piece.Side.Black))
-                        black++;
-                }
-            }
-
-            if (!_isPlayer)
-                if (white == 0)
-                    SideThatWon = Piece.Side.Black;
-                else if (black == 0)
-                    SideThatWon = Piece.Side.White;
+        public void UpdateBoardState()
+
+        {
+
+            int white = 0;
+
+            int black = 0;
+
+
+
+            foreach (Tile t in Tiles)
+
+            {
+
+                t.ResetColor();
+
+                if (t.Piece != null && !_isPlayer)
+
+                {
+
+                    if (t.Piece.SideOfPiece.Equals(Piece.Side.White))
+
+                        white++;
+
+                    else if (t.Piece.SideOfPiece.Equals(Piece.Side.Black))
+
+                        black++;
+
+                }
+
+            }
+
+
+
+            if (!_isPlayer)
+
+                if (white == 0)
+
+                    SideThatWon = Piece.Side.Black;
+
+                else if (black == 0)
+
+                    SideThatWon = Piece.Side.White;
+
         }
 
         public void HighlightUsablePieces()
