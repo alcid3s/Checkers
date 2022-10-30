@@ -193,9 +193,16 @@ namespace Checkers.Screens
             var sr = new StreamWriter(fs);
 
             string currentInformation = string.Empty;
+
+            bool firstLine = true;
             // While the game isn't finished
             while (!State.Equals(ScreenState.LoseState) && !State.Equals(ScreenState.WinState))
             {
+                if (firstLine)
+                {
+                    sr.WriteLine(Board.HasFen);
+                    firstLine = false;
+                }
                 if (!currentInformation.Equals(Board.NewMove))
                 {
                     currentInformation = Board.NewMove;

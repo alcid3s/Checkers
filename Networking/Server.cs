@@ -13,8 +13,8 @@ namespace Checkers.Networking
     public class Server
     {
         // Used for setup.
-       // public static string Setup = "1p1p1p1p1p/p1p1p1p1p1/1p1p1p1p1p/p1p1p1p1p1/10/10/1P1P1P1P1P/P1P1P1P1P1/1P1P1P1P1P/P1P1P1P1P1;";
-        public static string Setup = "10/10/10/8p1/10/10/1P1P1P1P1P/10/10/10;";
+        public static string Setup = "1p1p1p1p1p/p1p1p1p1p1/1p1p1p1p1p/p1p1p1p1p1/10/10/1P1P1P1P1P/P1P1P1P1P1/1P1P1P1P1P/P1P1P1P1P1;";
+        //public static string Setup = "10/10/10/8p1/10/10/1P1P1P1P1P/10/10/10;";
 
         private bool _whiteIsTaken = false;
 
