@@ -92,7 +92,7 @@ namespace Checkers.board
             }
         }
 
-        private void OnClick(Vector2 position)
+        private async void OnClick(Vector2 position)
         {
             foreach (Tile tile in Tiles)
             {
@@ -120,12 +120,10 @@ namespace Checkers.board
                         // if the tile clicked is a legal move for the piece.
                         if (legalMoves.Contains(tile.GetPositionInTilesArray()))
                         {
-                            new Thread(() =>
-                            {
-                                AwaitReplyFromServer(tile);
-                            }).Start();
+                            SendToServer(tile);
 
-                            _ = SendToServer(tile);
+                            // awaits reply from server
+                            await AwaitReplyFromServer(tile);
                         }
                         else
                             HighlightUsablePieces();
@@ -136,7 +134,7 @@ namespace Checkers.board
         }
 
         // Is public because server also needs to run this on another thread.
-        public void AwaitReplyFromServer(Tile tile)
+        public Task AwaitReplyFromServer(Tile tile)
         {
             while (GotReply.Equals(Reply.NONE)) ;
 
@@ -154,6 +152,7 @@ namespace Checkers.board
             {
                 Console.WriteLine("Illegal move");
             }
+            return Task.CompletedTask;
         }
 
         // Public so Client.cs can make use of it as well.
@@ -241,12 +240,12 @@ namespace Checkers.board
             }
         }
 
-        private async Task SendToServer(Tile tile)
+        private void SendToServer(Tile tile)
         {
             if (PositionSelected.Tile != null)
             {
                 string message = $"{PositionSelected.Tile.GetPositionInTilesArray()}:{typeof(Piece)}:{tile.GetPositionInTilesArray()};";
-                await Client.Send(message);
+                Client.Send(message);
             }
         }
 
