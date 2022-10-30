@@ -119,7 +119,7 @@ namespace Checkers.Networking
                     // If the player who has the turn also makes a move
                     Console.WriteLine($"DATA FROM CLIENT: {information}");
 
-                    (int, string, int) data = _board.ParseMessage(information);
+                    (int, string, int) data = Board.ParseMessage(information);
 
                     Console.WriteLine(data);
 

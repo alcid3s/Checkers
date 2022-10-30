@@ -1,4 +1,5 @@
-﻿using Checkers.Screens;
+﻿using Checkers.board;
+using Checkers.Screens;
 using Microsoft.VisualBasic;
 using System;
 using System.Collections.Generic;
@@ -69,7 +70,7 @@ namespace Checkers.Networking
                             // If a response is an update on the current position of the opposite player.
                             if (response.Contains(":"))
                             {
-                                (int, string, int) data = ScreenManager.Board.ParseMessage(response);
+                                (int, string, int) data = Board.ParseMessage(response);
                                 ScreenManager.Board.PositionSelected = new(ScreenManager.Board.Tiles[data.Item1], ScreenManager.Board.Tiles[data.Item1].Piece);
                                 Console.WriteLine(data.Item1 + "-" + data.Item3);
                                 ScreenManager.Board.ChangePosition(ScreenManager.Board.Tiles[data.Item3]);

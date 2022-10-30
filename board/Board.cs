@@ -319,7 +319,7 @@ namespace Checkers.board
         }
 
         // Parses information the server sends, server also uses this to parse the message the client sends. For changes in message structure change this method.
-        public (int, string, int) ParseMessage(string message)
+        public static (int, string, int) ParseMessage(string message)
         {
             string[] data = message.Split(':');
 
