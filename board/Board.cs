@@ -101,21 +101,7 @@ namespace Checkers.board
                         PositionSelected = new(tile, tile.Piece);
 
                         // Will change color of all tiles on which the piece can move.
-                        foreach (Tile t in Tiles)
-                        {
-                            t.ResetColor();
-                        }
-
-                        if (tile.Piece.CalculateForcingMoves().Count > 0)
-                            tile.Piece.CalculateForcingMoves().ForEach(position =>
-                            {
-                                ScreenManager.Board.Tiles[position].BlendColor(new Color(0xFF, 0x00, 0x00, 0xFF));
-                            });
-                        else
-                            tile.Piece.CalculateRegularMoves().ForEach(position =>
-                            {
-                                ScreenManager.Board.Tiles[position].BlendColor(new Color(0x00, 0x80, 0xFF, 0xFF));
-                            });
+                        HighlightTile();
                     }
 
                     // If the player already selected a position and presses on a tile without a piece on it.
@@ -135,9 +121,12 @@ namespace Checkers.board
 
                             _ = SendToServer(tile);
                         }
+                        else
+                            HighlightUsablePieces();
                     }
                 }
             }
+
         }
 
         // Is public because server also needs to run this on another thread.
@@ -184,10 +173,48 @@ namespace Checkers.board
 
                 PositionSelected = new(null, null);
 
-                foreach (Tile t in Tiles)
+                HighlightUsablePieces();
+            }
+        }
+
+        public void ResetTileColors()
+        {
+            foreach (Tile t in Tiles)
+            {
+                t.ResetColor();
+            }
+        }
+
+        public void HighlightTile()
+        {
+            ResetTileColors();
+            if (PositionSelected.Piece.CalculateForcingMoves().Count > 0)
+            {
+                PositionSelected.Tile.BlendColor(new Color(0xFF, 0x80, 0x80, 0xFF));
+                PositionSelected.Piece.CalculateForcingMoves().ForEach(position =>
                 {
-                    t.ResetColor();
-                }
+                    ScreenManager.Board.Tiles[position].BlendColor(new Color(0xFF, 0x00, 0x00, 0xFF));
+                });
+            }
+            else if (PositionSelected.Piece.CalculateRegularMoves().Count > 0)
+            {
+                PositionSelected.Tile.BlendColor(new Color(0x80, 0xC0, 0xFF, 0xFF));
+                PositionSelected.Piece.CalculateRegularMoves().ForEach(position =>
+                {
+                    ScreenManager.Board.Tiles[position].BlendColor(new Color(0x00, 0x80, 0xFF, 0xFF));
+                });
+            }
+        }
+
+        public void HighlightUsablePieces()
+        {
+            ResetTileColors();
+            if (Manager.WhoseTurn != _sideOfPlayer)
+                return;
+
+            foreach (Piece piece in Manager.LegalPieces())
+            {
+                piece.CurrentPosition.BlendColor(new Color(0xA0, 0x80, 0xFF, 0xFF));
             }
         }
 
@@ -258,6 +285,8 @@ namespace Checkers.board
                     tile.Piece.CurrentPosition = tile;
                 }
             }
+
+            HighlightUsablePieces();
 
             if (_isPlayer)
                 Console.WriteLine("---------------EOL OF SETUP CLIENT-------------------\n");
