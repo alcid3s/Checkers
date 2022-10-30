@@ -109,12 +109,12 @@ namespace Checkers.board
                         if (tile.Piece.CalculateForcingMoves().Count > 0)
                             tile.Piece.CalculateForcingMoves().ForEach(position =>
                             {
-                                ScreenManager.Board.Tiles[position].Color = Color.DARKPURPLE;
+                                ScreenManager.Board.Tiles[position].BlendColor(new Color(0xFF, 0x00, 0x00, 0xFF));
                             });
                         else
                             tile.Piece.CalculateRegularMoves().ForEach(position =>
                             {
-                                ScreenManager.Board.Tiles[position].Color = Color.DARKBLUE;
+                                ScreenManager.Board.Tiles[position].BlendColor(new Color(0x00, 0x80, 0xFF, 0xFF));
                             });
                     }
 

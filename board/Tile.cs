@@ -36,6 +36,11 @@ namespace Checkers.board
                 Color = new Color(0xC0, 0xB0, 0x80, 0xFF);
         }
 
+        public void BlendColor(Color color)
+        {
+            ResetColor();
+            Color = new Color((5 * Color.r + 3 * color.r) / 8, (5 * Color.g + 3 * color.g) / 8, (5 * Color.b + 3 * color.b) / 8, 0xFF);
+        }
         public void Attach(Piece piece)
         {
             Piece = piece;
