@@ -165,22 +165,20 @@ namespace Checkers.Networking
         {
             while (_board.SideThatWon.Equals(Piece.Side.None)) ;
 
+            Client winner;
+            Client loser;
             if (_board.SideThatWon.Equals(Piece.Side.White))
             {
-                Client winner = _clientList.Where(x => x.Side.Equals(Piece.Side.White)).First();
-                winner.Socket.Send(Encoding.UTF8.GetBytes("WON"));
-
-                Client loser = _clientList.Where(x => x.Side.Equals(Piece.Side.Black)).First();
-                loser.Socket.Send(Encoding.UTF8.GetBytes("LOST"));
+                winner = _clientList.Where(x => x.Side.Equals(Piece.Side.White)).First();
+                loser = _clientList.Where(x => x.Side.Equals(Piece.Side.Black)).First();
             }
-            else if (_board.SideThatWon.Equals(Piece.Side.Black))
+            else
             {
-                Client winner = _clientList.Where(x => x.Side.Equals(Piece.Side.Black)).First();
-                winner.Socket.Send(Encoding.UTF8.GetBytes("WON"));
-
-                Client loser = _clientList.Where(x => x.Side.Equals(Piece.Side.White)).First();
-                loser.Socket.Send(Encoding.UTF8.GetBytes("LOST"));
+                winner = _clientList.Where(x => x.Side.Equals(Piece.Side.Black)).First();
+                loser = _clientList.Where(x => x.Side.Equals(Piece.Side.White)).First();
             }
+            winner.Socket.Send(Encoding.UTF8.GetBytes("YOU WON"));
+            loser.Socket.Send(Encoding.UTF8.GetBytes("YOU LOSE"));
         }
     }
 }

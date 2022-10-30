@@ -40,6 +40,11 @@ namespace Checkers.Custom
                 if (IsMouseButtonPressed(MouseButton.MOUSE_BUTTON_LEFT))
                 {
                     State = !State;
+                    Console.Write($"Going");
+                    if(State)
+                        Console.WriteLine(" to save data.");
+                    else
+                        Console.WriteLine(" not to save data");
                 }
             }
             else

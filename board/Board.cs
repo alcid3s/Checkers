@@ -155,10 +155,10 @@ namespace Checkers.board
                 GotReply = Reply.NONE;
                 ChangePosition(tile);
 
-                if (!_isPlayer)
-                    Console.WriteLine($"SERVER: Changed position: {tile.GetPositionInTilesArray()}");
-                else
-                    Console.WriteLine($"CLIENT: Changed position: {tile.GetPositionInTilesArray()}");
+                //if (!_isPlayer)
+                //    Console.WriteLine($"SERVER: Changed position: {tile.GetPositionInTilesArray()}");
+                //else
+                //    Console.WriteLine($"CLIENT: Changed position: {tile.GetPositionInTilesArray()}");
             }
             else if (GotReply.Equals(Reply.FALSE))
             {
@@ -177,15 +177,11 @@ namespace Checkers.board
                 // Used for FileIO
                 NewMove = PositionSelected.Tile.GetPositionInTilesArray() + ":" + typeof(Piece) + ":" + tile.GetPositionInTilesArray();
 
-                if (!_isPlayer)
-                {
-                    Console.WriteLine($"SERVER: NEW POSITION FOR PIECE: {tile.GetPositionInTilesArray()}");
-                }
+                //if (!_isPlayer)
+                //    Console.WriteLine($"SERVER: NEW POSITION FOR PIECE: {tile.GetPositionInTilesArray()}");
 
-                if (_isPlayer)
-                {
-                    Console.WriteLine($"CLIENT: NEW POS = {tile.GetPositionInTilesArray()}");
-                }
+                //if (_isPlayer)
+                //    Console.WriteLine($"CLIENT: NEW POS = {tile.GetPositionInTilesArray()}");
 
                 PositionSelected = new(null, null);
                 UpdateBoardState();
@@ -229,7 +225,7 @@ namespace Checkers.board
         {
             Manager = new PieceManager(this);
 
-            Console.WriteLine($"FEN: {fen}");
+            // Console.WriteLine($"FEN: {fen}");
 
 
             int x = 0, y = 0;
@@ -284,10 +280,10 @@ namespace Checkers.board
                 }
             }
 
-            if (_isPlayer)
-                Console.WriteLine("---------------EOL OF SETUP CLIENT-------------------\n");
-            else
-                Console.WriteLine("---------------EOL OF SETUP SERVER-------------------\n");
+            //if (_isPlayer)
+            //    Console.WriteLine("---------------EOL OF SETUP CLIENT-------------------\n");
+            //else
+            //    Console.WriteLine("---------------EOL OF SETUP SERVER-------------------\n");
 
             HasInitialised = true;
         }
@@ -297,7 +293,7 @@ namespace Checkers.board
         {
             if (!_isPlayer)
             {
-                Console.WriteLine($"SERVER: currentpos: {currentPosition} and containspiece = {Tiles[currentPosition].Piece != null}");
+                // Console.WriteLine($"SERVER: currentpos: {currentPosition} and containspiece = {Tiles[currentPosition].Piece != null}");
 
                 // Check if the place selected contains a piece on the board the server holds
                 if (Tiles[currentPosition].Piece != null)

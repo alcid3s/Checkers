@@ -34,9 +34,10 @@ namespace Checkers.Screens
             _playbtn.Update();
             _saveGame.Update();
 
-            SaveData = _saveGame.State;
+            
             _playbtn.OnAction += delegate
             {
+                SaveData = _saveGame.State;
                 ScreenManager.State = ScreenManager.ScreenState.HostOrJoinState;
             };
         }

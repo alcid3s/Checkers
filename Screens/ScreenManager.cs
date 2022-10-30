@@ -44,13 +44,12 @@ namespace Checkers.Screens
         private JoinScreen _joinScreen = new();
         private WaitForPlayerScreen _waitScreen = new();
         private WinScreen _winScreen = new();
-
+        private LoseScreen _loseScreen = new();
 
         private Server? _server = null;
         private Client? _client = null;
 
         private bool _firstTimeRunBoard = true;
-        private bool _firstTimeRunHostOrJoin = true;
 
         public ScreenManager(Color backGround)
         {
@@ -65,15 +64,6 @@ namespace Checkers.Screens
                     break;
 
                 case ScreenState.HostOrJoinState:
-
-                    // New thread goes here because it comes after MainScreen, and mainscreen holds SaveData state.
-                    if (_firstTimeRunHostOrJoin)
-                    {
-                        new Thread(SaveData).Start();
-                        _firstTimeRunHostOrJoin = false;
-                    }
-
-
                     _hostOrJoinScreen.Update();
                     break;
 
@@ -94,6 +84,10 @@ namespace Checkers.Screens
                     {
                         _client = new Client(_joinScreen.Ip, _joinScreen.Port);
                         _client.Connect();
+
+                        if (_mainScreen.SaveData)
+                            new Thread(SaveData).Start();
+
                         _firstTimeRunBoard = false;
                     }
                     else if (Board.HasFen != String.Empty && !Board.HasInitialised)
@@ -118,16 +112,12 @@ namespace Checkers.Screens
                     }
 
                     else if (Board.HasFen != string.Empty && !Board.HasInitialised)
-                    {
                         Board.Init(Board.HasFen);
-                    }
 
 
                     else if (_server != null && Board.HasInitialised)
                         if (Server.AmountOfPlayersActive != 2)
-                        {
                             State = ScreenState.WaitState;
-                        }
 
                         else
                             State = ScreenState.PlayState;
@@ -135,6 +125,10 @@ namespace Checkers.Screens
 
                 case ScreenState.WinState:
                     _winScreen.Update();
+                    break;
+
+                case ScreenState.LoseState:
+                    _loseScreen.Update();
                     break;
             }
         }
@@ -181,6 +175,10 @@ namespace Checkers.Screens
                 case ScreenState.WinState:
                     _winScreen.Draw();
                     break;
+
+                case ScreenState.LoseState:
+                    _loseScreen.Draw();
+                    break;
             }
         }
 
@@ -196,20 +194,22 @@ namespace Checkers.Screens
 
             string currentInformation = string.Empty;
             // While the game isn't finished
-            while (Board.SideThatWon.Equals(Piece.Side.None))
+            while (!State.Equals(ScreenState.LoseState) && !State.Equals(ScreenState.WinState))
             {
                 if (!currentInformation.Equals(Board.NewMove))
                 {
                     currentInformation = Board.NewMove;
+                    Console.WriteLine($"Writing: {currentInformation}");
                     sr.WriteLine(currentInformation);
                 }
             }
 
-            if (Board.SideThatWon.Equals(Piece.Side.White))
+            if (State.Equals(ScreenState.WinState))
                 sr.WriteLine("White won the game");
-            else if (Board.SideThatWon.Equals(Piece.Side.Black))
+            else if (State.Equals(ScreenState.LoseState))
                 sr.WriteLine("Black won the game");
 
+            Console.WriteLine("Closing streamWriter");
             // game has finished
             sr.Close();
         }

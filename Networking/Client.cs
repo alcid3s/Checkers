@@ -56,11 +56,11 @@ namespace Checkers.Networking
                         byte[] message = new byte[1024];
                         _socket.Receive(message);
                         string response = Encoding.UTF8.GetString(message);
-                        Console.WriteLine($"CLIENT: Data received: {response}");
+                        //Console.WriteLine($"CLIENT: Data received: {response}");
 
                         if (firstMessage)
                         {
-                            Console.WriteLine("CLIENT: Initialising FEN");
+                            //Console.WriteLine("CLIENT: Initialising FEN");
                             ScreenManager.Board.HasFen = response;
                             firstMessage = false;
                         }
@@ -75,6 +75,18 @@ namespace Checkers.Networking
                                 ScreenManager.Board.ChangePosition(ScreenManager.Board.Tiles[data.Item3]);
                             }
 
+                            // if you won.
+                            else if (response.Contains("WON"))
+                            {
+                                ScreenManager.State = ScreenManager.ScreenState.WinState;
+                            }
+
+                            // If you lost.
+                            else if (response.Contains("LOSE"))
+                            {
+                                ScreenManager.State = ScreenManager.ScreenState.LoseState;
+                            }
+
                             // If your own move has been validated.
                             else if (response.Contains("T"))
                             {
@@ -85,17 +97,7 @@ namespace Checkers.Networking
                                 ScreenManager.Board.GotReply = board.Board.Reply.FALSE;
                             }
 
-                            // if you won.
-                            else if (response.Contains("WON"))
-                            {
-                                ScreenManager.State = ScreenManager.ScreenState.WinState;
-                            }
 
-                            // If you lost.
-                            else if (response.Contains("LOST"))
-                            {
-                                ScreenManager.State = ScreenManager.ScreenState.LoseState;
-                            }
                         }
                     }
                     catch (Exception e)
