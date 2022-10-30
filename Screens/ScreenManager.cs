@@ -203,7 +203,7 @@ namespace Checkers.Screens
                     sr.WriteLine(Board.HasFen);
                     firstLine = false;
                 }
-                if (!Board.NewMove.Equals(string.Empty) && !currentInformation.Equals(Board.NewMove))
+                if (!currentInformation.Equals(Board.NewMove))
                 {
                     currentInformation = Board.NewMove;
                     Console.WriteLine($"Writing: {currentInformation}");

@@ -92,7 +92,7 @@ namespace Checkers.board
             }
         }
 
-        private async void OnClick(Vector2 position)
+        private void OnClick(Vector2 position)
         {
             foreach (Tile tile in Tiles)
             {
@@ -120,10 +120,12 @@ namespace Checkers.board
                         // if the tile clicked is a legal move for the piece.
                         if (legalMoves.Contains(tile.GetPositionInTilesArray()))
                         {
-                            SendToServer(tile);
+                            new Thread(() =>
+                            {
+                                AwaitReplyFromServer(tile);
+                            }).Start();
 
-                            // awaits reply from server
-                            await AwaitReplyFromServer(tile);
+                            _ = SendToServer(tile);
                         }
                         else
                             HighlightUsablePieces();
@@ -134,7 +136,7 @@ namespace Checkers.board
         }
 
         // Is public because server also needs to run this on another thread.
-        public Task AwaitReplyFromServer(Tile tile)
+        public void AwaitReplyFromServer(Tile tile)
         {
             while (GotReply.Equals(Reply.NONE)) ;
 
@@ -152,7 +154,6 @@ namespace Checkers.board
             {
                 Console.WriteLine("Illegal move");
             }
-            return Task.CompletedTask;
         }
 
         // Public so Client.cs can make use of it as well.
@@ -175,13 +176,7 @@ namespace Checkers.board
                 PositionSelected = new(null, null);
                 UpdateBoardState();
 
-                if (Manager.LastCapturer != null && Manager.WhoseTurn == _sideOfPlayer)
-                {
-                    PositionSelected = new(Manager.LastCapturer.CurrentPosition, Manager.LastCapturer);
-                    HighlightTile();
-                }
-                else
-                    HighlightUsablePieces();
+                HighlightUsablePieces();
             }
         }
 
@@ -215,17 +210,49 @@ namespace Checkers.board
         }
 
         public void UpdateBoardState()
-        {
-            if (!_isPlayer)
-            {
-                if (Manager.LegalPieces().Count != 0)
-                    return;
 
-                if (Manager.WhoseTurn == Piece.Side.White)
-                    SideThatWon = Piece.Side.Black;
-                else if (Manager.WhoseTurn == Piece.Side.Black)
-                    SideThatWon = Piece.Side.White;
+        {
+
+            int white = 0;
+
+            int black = 0;
+
+
+
+            foreach (Tile t in Tiles)
+
+            {
+
+                t.ResetColor();
+
+                if (t.Piece != null && !_isPlayer)
+
+                {
+
+                    if (t.Piece.SideOfPiece.Equals(Piece.Side.White))
+
+                        white++;
+
+                    else if (t.Piece.SideOfPiece.Equals(Piece.Side.Black))
+
+                        black++;
+
+                }
+
             }
+
+
+
+            if (!_isPlayer)
+
+                if (white == 0)
+
+                    SideThatWon = Piece.Side.Black;
+
+                else if (black == 0)
+
+                    SideThatWon = Piece.Side.White;
+
         }
 
         public void HighlightUsablePieces()
@@ -240,12 +267,12 @@ namespace Checkers.board
             }
         }
 
-        private void SendToServer(Tile tile)
+        private async Task SendToServer(Tile tile)
         {
             if (PositionSelected.Tile != null)
             {
                 string message = $"{PositionSelected.Tile.GetPositionInTilesArray()}:{typeof(Piece)}:{tile.GetPositionInTilesArray()};";
-                Client.Send(message);
+                await Client.Send(message);
             }
         }
 
@@ -315,6 +342,29 @@ namespace Checkers.board
             //    Console.WriteLine("---------------EOL OF SETUP SERVER-------------------\n");
 
             HasInitialised = true;
+        }
+
+        // This method should only be used by the server to verify if the move is legal.
+        public bool IsLegalMove(int currentPosition, string typeOfPiece, int futurePosition)
+        {
+            if (!_isPlayer)
+            {
+                // Console.WriteLine($"SERVER: currentpos: {currentPosition} and containspiece = {Tiles[currentPosition].Piece != null}");
+
+                // Check if the place selected contains a piece on the board the server holds
+                if (Tiles[currentPosition].Piece != null)
+                {
+                    Console.WriteLine("jjj:" + Tiles[currentPosition].Piece.CurrentPosition == null);
+                    List<int> legalMoves = Tiles[currentPosition].Piece.CalculateRegularMoves();
+
+                    // If the legalMoves are correct according to the server return true
+                    if (legalMoves.Contains(futurePosition))
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
         }
 
         // Parses information the server sends, server also uses this to parse the message the client sends. For changes in message structure change this method.

@@ -38,7 +38,7 @@ namespace Checkers.Custom
             _position = new Vector2(_box.x + (_box.width / 6), (_box.y + 100));
             _frameRec = new Rectangle(0.0f, 0.0f, _width, _height);
 
-            _exitBtn = new Button(new Rectangle(_box.x + (_box.width / 4), _box.y + (_box.height - 60), 250, 50), Color.GREEN, 40, "EXIT GAME");
+            _exitBtn = new Button(new Rectangle(_box.x + (_box.width / 4), _box.y + (_box.height - 50), 250, 50), Color.GREEN, 40, "EXIT GAME");
         }
         public void Draw()
         {
