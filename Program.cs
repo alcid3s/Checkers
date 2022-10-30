@@ -12,6 +12,8 @@ namespace Checkers
     public class Program
     {
         public static Texture2D MrBeanSprite;
+        public static Texture2D WonSprite;
+        public static Texture2D LostSprite;
         public static void Main()
         {
             SetTraceLogLevel(LOG_NONE);
@@ -21,6 +23,8 @@ namespace Checkers
             InitWindow(screenWidth, screenHeight, "Checkers");
 
             MrBeanSprite = LoadTexture("../../../res/MrBeanSprite.png");
+            WonSprite = LoadTexture("../../../res/WonSprite.png");
+            LostSprite = LoadTexture("../../../res/LostSprite.png");
 
             Piece.GetTextures();
 

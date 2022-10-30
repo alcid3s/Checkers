@@ -13,14 +13,17 @@ namespace Checkers.Networking
     public class Server
     {
         // Used for setup.
-        public static string Setup = "1p1p1p1p1p/p1p1p1p1p1/1p1p1p1p1p/p1p1p1p1p1/10/10/1P1P1P1P1P/P1P1P1P1P1/1P1P1P1P1P/P1P1P1P1P1;";
+       // public static string Setup = "1p1p1p1p1p/p1p1p1p1p1/1p1p1p1p1p/p1p1p1p1p1/10/10/1P1P1P1P1P/P1P1P1P1P1/1P1P1P1P1P/P1P1P1P1P1;";
+        public static string Setup = "10/10/10/8p1/10/10/1P1P1P1P1P/10/10/10;";
+
         private bool _whiteIsTaken = false;
 
         // Variables for networking.
         private readonly Socket _serverSocket;
-        private Client[] _clientList = new Client[2]; 
+        private Client[] _clientList = new Client[2];
         private readonly short _port = 1337;
 
+        // The server also holds a board to validate moves.
         private readonly Board _board;
         private readonly string _currentState = string.Empty;
 
@@ -59,7 +62,7 @@ namespace Checkers.Networking
         {
             new Thread(() =>
             {
-                while (true)
+                while (AmountOfPlayersActive != 2)
                 {
                     // New incoming connection.
                     Socket? socket = null;
@@ -78,7 +81,6 @@ namespace Checkers.Networking
                             side = Piece.Side.White;
                             _whiteIsTaken = true;
                         }
-                            
 
                         Client client = new(socket, AmountOfPlayersActive, side);
                         _clientList[AmountOfPlayersActive] = client;
@@ -93,6 +95,7 @@ namespace Checkers.Networking
                         }).Start();
                     }
                 }
+                new Thread(CheckWinState).Start();
             }).Start();
         }
 
@@ -114,9 +117,8 @@ namespace Checkers.Networking
                     string information = Encoding.UTF8.GetString(message, 0, receive);
 
                     // If the player who has the turn also makes a move
-                    //if (client.Side.Equals(_whoHasTurn))        {
                     Console.WriteLine($"DATA FROM CLIENT: {information}");
-            
+
                     (int, string, int) data = _board.ParseMessage(information);
 
                     Console.WriteLine(data);
@@ -129,11 +131,14 @@ namespace Checkers.Networking
                         client.Socket.Send(Encoding.UTF8.GetBytes("T"));
                         _board.GotReply = Board.Reply.TRUE;
 
-                        _board.PositionSelected = new(_board.Tiles[data.Item1], _board.Tiles[data.Item1].Piece);
+                        // _board.PositionSelected = new(_board.Tiles[data.Item1], _board.Tiles[data.Item1].Piece);
 
                         // The move was legal so this updates the board for server and client that sended the information.
                         Client opponent = _clientList.Where(x => !x.Equals(client)).ToList().First();
                         opponent.Socket.Send(Encoding.UTF8.GetBytes(information));
+
+                        Thread.Sleep(100);
+                        _board.UpdateBoardState();
                     }
                     else
                     {
@@ -145,7 +150,6 @@ namespace Checkers.Networking
                     Console.WriteLine($"Server got error with Client {client.PlayerId}:\n{e}");
                 }
             }
-
             client.Socket.Close();
         }
 
@@ -153,8 +157,28 @@ namespace Checkers.Networking
         {
             if (client.Side.Equals(Piece.Side.White))
                 client.Socket.Send(Encoding.UTF8.GetBytes(_currentState + 'W'));
-            else if(client.Side.Equals(Piece.Side.Black))
+            else if (client.Side.Equals(Piece.Side.Black))
                 client.Socket.Send(Encoding.UTF8.GetBytes(_currentState + 'B'));
+        }
+
+        private void CheckWinState()
+        {
+            while (_board.SideThatWon.Equals(Piece.Side.None)) ;
+
+            Client winner;
+            Client loser;
+            if (_board.SideThatWon.Equals(Piece.Side.White))
+            {
+                winner = _clientList.Where(x => x.Side.Equals(Piece.Side.White)).First();
+                loser = _clientList.Where(x => x.Side.Equals(Piece.Side.Black)).First();
+            }
+            else
+            {
+                winner = _clientList.Where(x => x.Side.Equals(Piece.Side.Black)).First();
+                loser = _clientList.Where(x => x.Side.Equals(Piece.Side.White)).First();
+            }
+            winner.Socket.Send(Encoding.UTF8.GetBytes("YOU WON"));
+            loser.Socket.Send(Encoding.UTF8.GetBytes("YOU LOSE"));
         }
     }
 }
