@@ -104,7 +104,6 @@ namespace Checkers.Screens
                 ScreenManager.State = ScreenManager.ScreenState.PlayState;
                 UnloadTexture(_mrBean);
             }
-
         }
     }
 }

@@ -17,7 +17,6 @@ namespace Checkers.Custom
     public class Button : INode
     {
         public OnAction OnAction { get; set; }
-
         private Rectangle _rectangle;
         private Color _color;
         private string _text;
