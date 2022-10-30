@@ -1,4 +1,0 @@
-67:Checkers.pieces.Piece:56
-38:Checkers.pieces.Piece:47
-56:Checkers.pieces.Piece:38
-Black won the game
