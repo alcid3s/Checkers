@@ -29,7 +29,6 @@ namespace Checkers
             Piece.GetTextures();
 
             SetTraceLogLevel(LOG_NONE);
-
             ScreenManager manager = new ScreenManager(Color.LIME);
 
             SetTargetFPS(60);
@@ -40,7 +39,6 @@ namespace Checkers
                 manager.Draw();
                 EndDrawing();
             }
-
             CloseWindow();
         }
     }
