@@ -2,7 +2,7 @@
 using Checkers.pieces;
 using Checkers.Screens;
 using Raylib_cs;
-using System.ComponentModel;
+using System.ComponentModel;
 using System.Numerics;
 using static Raylib_cs.Raylib;
 
@@ -106,21 +106,7 @@ namespace Checkers.board
                         PositionSelected = new(tile, tile.Piece);
 
                         // Will change color of all tiles on which the piece can move.
-                        foreach (Tile t in Tiles)
-                        {
-                            t.ResetColor();
-                        }
-
-                        if (tile.Piece.CalculateForcingMoves().Count > 0)
-                            tile.Piece.CalculateForcingMoves().ForEach(position =>
-                            {
-                                ScreenManager.Board.Tiles[position].Color = Color.DARKPURPLE;
-                            });
-                        else
-                            tile.Piece.CalculateRegularMoves().ForEach(position =>
-                            {
-                                ScreenManager.Board.Tiles[position].Color = Color.DARKBLUE;
-                            });
+                        HighlightTile();
                     }
 
                     // If the player already selected a position and presses on a tile without a piece on it.
@@ -140,9 +126,12 @@ namespace Checkers.board
 
                             _ = SendToServer(tile);
                         }
+                        else
+                            HighlightUsablePieces();
                     }
                 }
             }
+
         }
 
         // Is public because server also needs to run this on another thread.
@@ -185,31 +174,74 @@ namespace Checkers.board
 
                 PositionSelected = new(null, null);
                 UpdateBoardState();
+
+                HighlightUsablePieces();
             }
         }
 
-        public void UpdateBoardState()
+        public void ResetTileColors()
         {
-            int white = 0;
-            int black = 0;
-
             foreach (Tile t in Tiles)
             {
                 t.ResetColor();
-                if (t.Piece != null && !_isPlayer)
-                {
-                    if (t.Piece.SideOfPiece.Equals(Piece.Side.White))
-                        white++;
-                    else if (t.Piece.SideOfPiece.Equals(Piece.Side.Black))
-                        black++;
-                }
             }
+        }
 
-            if (!_isPlayer)
-                if (white == 0)
-                    SideThatWon = Piece.Side.Black;
-                else if (black == 0)
-                    SideThatWon = Piece.Side.White;
+        public void HighlightTile()
+        {
+            ResetTileColors();
+            if (PositionSelected.Piece.CalculateForcingMoves().Count > 0)
+            {
+                PositionSelected.Tile.BlendColor(new Color(0xFF, 0x80, 0x80, 0xFF));
+                PositionSelected.Piece.CalculateForcingMoves().ForEach(position =>
+                {
+                    ScreenManager.Board.Tiles[position].BlendColor(new Color(0xFF, 0x00, 0x00, 0xFF));
+                });
+            }
+            else if (PositionSelected.Piece.CalculateRegularMoves().Count > 0)
+            {
+                PositionSelected.Tile.BlendColor(new Color(0x80, 0xC0, 0xFF, 0xFF));
+                PositionSelected.Piece.CalculateRegularMoves().ForEach(position =>
+                {
+                    ScreenManager.Board.Tiles[position].BlendColor(new Color(0x00, 0x80, 0xFF, 0xFF));
+                });
+            }
+        }
+
+        public void UpdateBoardState()
+        {
+            int white = 0;
+            int black = 0;
+
+            foreach (Tile t in Tiles)
+            {
+                t.ResetColor();
+                if (t.Piece != null && !_isPlayer)
+                {
+                    if (t.Piece.SideOfPiece.Equals(Piece.Side.White))
+                        white++;
+                    else if (t.Piece.SideOfPiece.Equals(Piece.Side.Black))
+                        black++;
+                }
+            }
+
+            if (!_isPlayer)
+                if (white == 0)
+                    SideThatWon = Piece.Side.Black;
+                else if (black == 0)
+                    SideThatWon = Piece.Side.White;
+        }
+
+        public void HighlightUsablePieces()
+        {
+            ResetTileColors();
+            if (Manager.WhoseTurn != _sideOfPlayer)
+                return;
+
+            foreach (Piece piece in Manager.LegalPieces())
+            {
+                piece.CurrentPosition.BlendColor(new Color(0xA0, 0x80, 0xFF, 0xFF));
+            }
         }
 
         private async Task SendToServer(Tile tile)
@@ -280,6 +312,7 @@ namespace Checkers.board
                 }
             }
 
+            HighlightUsablePieces();
             //if (_isPlayer)
             //    Console.WriteLine("---------------EOL OF SETUP CLIENT-------------------\n");
             //else

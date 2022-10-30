@@ -51,7 +51,7 @@ namespace Checkers.pieces
 
         private static Texture2D GetTexture(int x, int y)
         {
-            Image image = LoadImage("../../../res/Pieces.png");
+            Image image = LoadImage("../../../res/Pieces2.png");
 
             ImageCrop(ref image, new Rectangle(x, y, x + 96, y + 96));
 
