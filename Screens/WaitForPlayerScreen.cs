@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Checkers.Networking;
 using System.Numerics;
 using System.Net;
+using System.Net.Sockets;
 
 namespace Checkers.Screens
 {
@@ -53,7 +54,7 @@ namespace Checkers.Screens
             try
             {
                 IPHostEntry ipEntry = Dns.GetHostEntry(Dns.GetHostName());
-                ip = ipEntry.AddressList[1].ToString();
+                ip = ipEntry.AddressList.First(x => x.AddressFamily == AddressFamily.InterNetwork).ToString();
             }
             catch (Exception e)
             {
