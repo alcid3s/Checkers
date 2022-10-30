@@ -2,6 +2,7 @@
 using Checkers.pieces;
 using Checkers.Screens;
 using Raylib_cs;
+using System.ComponentModel;
 using System.Numerics;
 using static Raylib_cs.Raylib;
 
@@ -26,8 +27,12 @@ namespace Checkers.board
         private Piece.Side _sideOfPlayer;
         public SelectedPosition PositionSelected { get; set; }
 
-        private readonly bool _isPlayer;
+        // Used for FileIO
+        public string NewMove { get; set; } = string.Empty;
 
+        public Piece.Side SideThatWon { get; private set; } = Piece.Side.None;
+
+        private readonly bool _isPlayer;
         public enum Reply
         {
             NONE,
@@ -139,10 +144,10 @@ namespace Checkers.board
                 GotReply = Reply.NONE;
                 ChangePosition(tile);
 
-                if (!_isPlayer)
-                    Console.WriteLine($"SERVER: Changed position: {tile.GetPositionInTilesArray()}");
-                else
-                    Console.WriteLine($"CLIENT: Changed position: {tile.GetPositionInTilesArray()}");
+                //if (!_isPlayer)
+                //    Console.WriteLine($"SERVER: Changed position: {tile.GetPositionInTilesArray()}");
+                //else
+                //    Console.WriteLine($"CLIENT: Changed position: {tile.GetPositionInTilesArray()}");
             }
             else if (GotReply.Equals(Reply.FALSE))
             {
@@ -156,22 +161,19 @@ namespace Checkers.board
             // They wont ever be null but it removes all errors :)
             if (PositionSelected.Piece != null && PositionSelected.Tile != null)
             {
-                //Manager.Move(PositionSelected.Piece, tile.GetPositionInTilesArray());
-                //Tiles[tile.GetPositionInTilesArray()].Attach(PositionSelected.Piece);
-                //PositionSelected.Tile.Detach();
                 Manager.Move(PositionSelected.Piece, tile.GetPositionInTilesArray());
 
-                if (!_isPlayer)
-                {
-                    Console.WriteLine($"SERVER: NEW POSITION FOR PIECE: {tile.GetPositionInTilesArray()}");
-                }
+                // Used for FileIO
+                NewMove = PositionSelected.Tile.GetPositionInTilesArray() + ":" + typeof(Piece) + ":" + tile.GetPositionInTilesArray();
 
-                if (_isPlayer)
-                {
-                    Console.WriteLine($"CLIENT: NEW POS = {tile.GetPositionInTilesArray()}");
-                }
+                //if (!_isPlayer)
+                //    Console.WriteLine($"SERVER: NEW POSITION FOR PIECE: {tile.GetPositionInTilesArray()}");
+
+                //if (_isPlayer)
+                //    Console.WriteLine($"CLIENT: NEW POS = {tile.GetPositionInTilesArray()}");
 
                 PositionSelected = new(null, null);
+                UpdateBoardState();
 
                 HighlightUsablePieces();
             }
@@ -206,6 +208,30 @@ namespace Checkers.board
             }
         }
 
+        public void UpdateBoardState()
+        {
+            int white = 0;
+            int black = 0;
+
+            foreach (Tile t in Tiles)
+            {
+                t.ResetColor();
+                if (t.Piece != null && !_isPlayer)
+                {
+                    if (t.Piece.SideOfPiece.Equals(Piece.Side.White))
+                        white++;
+                    else if (t.Piece.SideOfPiece.Equals(Piece.Side.Black))
+                        black++;
+                }
+            }
+
+            if (!_isPlayer)
+                if (white == 0)
+                    SideThatWon = Piece.Side.Black;
+                else if (black == 0)
+                    SideThatWon = Piece.Side.White;
+        }
+
         public void HighlightUsablePieces()
         {
             ResetTileColors();
@@ -231,7 +257,7 @@ namespace Checkers.board
         {
             Manager = new PieceManager(this);
 
-            Console.WriteLine($"FEN: {fen}");
+            // Console.WriteLine($"FEN: {fen}");
 
 
             int x = 0, y = 0;
@@ -287,11 +313,10 @@ namespace Checkers.board
             }
 
             HighlightUsablePieces();
-
-            if (_isPlayer)
-                Console.WriteLine("---------------EOL OF SETUP CLIENT-------------------\n");
-            else
-                Console.WriteLine("---------------EOL OF SETUP SERVER-------------------\n");
+            //if (_isPlayer)
+            //    Console.WriteLine("---------------EOL OF SETUP CLIENT-------------------\n");
+            //else
+            //    Console.WriteLine("---------------EOL OF SETUP SERVER-------------------\n");
 
             HasInitialised = true;
         }
@@ -301,7 +326,7 @@ namespace Checkers.board
         {
             if (!_isPlayer)
             {
-                Console.WriteLine($"SERVER: currentpos: {currentPosition} and containspiece = {Tiles[currentPosition].Piece != null}");
+                // Console.WriteLine($"SERVER: currentpos: {currentPosition} and containspiece = {Tiles[currentPosition].Piece != null}");
 
                 // Check if the place selected contains a piece on the board the server holds
                 if (Tiles[currentPosition].Piece != null)

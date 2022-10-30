@@ -19,7 +19,8 @@ namespace Checkers.pieces
         public enum Side
         {
             White,
-            Black
+            Black,
+            None
         }
         public Piece(Side side)
         {

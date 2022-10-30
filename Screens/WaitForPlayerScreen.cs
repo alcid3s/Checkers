@@ -71,12 +71,6 @@ namespace Checkers.Screens
 
         public override void Update()
         {
-            if (Ready && _framesCounter >= (5 * 21))
-            {
-                _framesCounter = 0;
-                _currentFrame = 0;
-            }
-
             _framesCounter++;
 
             if (_framesCounter >= (60 / _framesSpeed))
@@ -104,7 +98,6 @@ namespace Checkers.Screens
                 ScreenManager.State = ScreenManager.ScreenState.PlayState;
                 UnloadTexture(_mrBean);
             }
-
         }
     }
 }
