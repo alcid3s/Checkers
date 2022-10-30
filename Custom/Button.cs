@@ -6,14 +6,11 @@ using System.Linq;
 using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
-using Checkers.graphics.shapes;
-using Checkers.graphics.components.renderer;
-using Checkers.graphics.components.interactable;
-using Checkers.graphics.components.interactable.mouse_event;
 using Raylib_cs;
 
 namespace Checkers.Custom
 {
+    public delegate void OnAction();
     public class Button : INode
     {
         public OnAction OnAction { get; set; }
