@@ -9,6 +9,8 @@ using System.Text;
 using System.Threading.Tasks;
 using static Checkers.Screens.ScreenManager;
 using Checkers.Networking;
+using Checkers.Custom;
+using Checkers.pieces;
 
 namespace Checkers.Screens
 {
@@ -27,7 +29,9 @@ namespace Checkers.Screens
             JoinState,
             WaitState,
             PlayState,
-            SetupServer
+            SetupServer,
+            WinState,
+            LoseState
         }
 
         public static ScreenState State = ScreenState.MainScreenState;
@@ -38,8 +42,8 @@ namespace Checkers.Screens
         private MainScreen _mainScreen = new(Color.LIME);
         private HostOrJoinScreen _hostOrJoinScreen = new();
         private JoinScreen _joinScreen = new();
-
         private WaitForPlayerScreen _waitScreen = new();
+        private WinScreen _winScreen = new();
 
 
         private Server? _server = null;
@@ -68,7 +72,7 @@ namespace Checkers.Screens
                         new Thread(SaveData).Start();
                         _firstTimeRunHostOrJoin = false;
                     }
-                    
+
 
                     _hostOrJoinScreen.Update();
                     break;
@@ -84,7 +88,7 @@ namespace Checkers.Screens
                     if (_waitScreen.Ready)
                         _waitScreen.Update();
                     break;
-                    
+
                 case ScreenState.PlayState:
                     if (_firstTimeRunBoard)
                     {
@@ -94,7 +98,7 @@ namespace Checkers.Screens
                     }
                     else if (Board.HasFen != String.Empty && !Board.HasInitialised)
                         Board.Init(Board.HasFen);
-                    else if(Board.HasInitialised)
+                    else if (Board.HasInitialised)
                         Board.Update();
                     break;
 
@@ -112,22 +116,25 @@ namespace Checkers.Screens
 
                         _firstTimeRunBoard = false;
                     }
-                    
+
                     else if (Board.HasFen != string.Empty && !Board.HasInitialised)
                     {
                         Board.Init(Board.HasFen);
                     }
-                        
-                    
+
+
                     else if (_server != null && Board.HasInitialised)
                         if (Server.AmountOfPlayersActive != 2)
                         {
                             State = ScreenState.WaitState;
                         }
-                            
+
                         else
                             State = ScreenState.PlayState;
+                    break;
 
+                case ScreenState.WinState:
+                    _winScreen.Update();
                     break;
             }
         }
@@ -163,12 +170,16 @@ namespace Checkers.Screens
 
                 case ScreenState.PlayState:
                     ClearBackground(_backGround);
-                    if(Board.HasInitialised)
+                    if (Board.HasInitialised)
                         Board.Draw();
                     break;
 
                 case ScreenState.SetupServer:
                     ClearBackground(_backGround);
+                    break;
+
+                case ScreenState.WinState:
+                    _winScreen.Draw();
                     break;
             }
         }
@@ -185,7 +196,7 @@ namespace Checkers.Screens
 
             string currentInformation = string.Empty;
             // While the game isn't finished
-            while (true)
+            while (Board.SideThatWon.Equals(Piece.Side.None))
             {
                 if (!currentInformation.Equals(Board.NewMove))
                 {
@@ -193,6 +204,11 @@ namespace Checkers.Screens
                     sr.WriteLine(currentInformation);
                 }
             }
+
+            if (Board.SideThatWon.Equals(Piece.Side.White))
+                sr.WriteLine("White won the game");
+            else if (Board.SideThatWon.Equals(Piece.Side.Black))
+                sr.WriteLine("Black won the game");
 
             // game has finished
             sr.Close();

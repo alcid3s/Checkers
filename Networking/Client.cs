@@ -3,6 +3,7 @@ using Microsoft.VisualBasic;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Net;
 using System.Net.Sockets;
 using System.Numerics;
@@ -50,40 +51,60 @@ namespace Checkers.Networking
             {
                 while (_socket.Connected)
                 {
-                    byte[] message = new byte[1024];
-                    _socket.Receive(message);
-                    string response = Encoding.UTF8.GetString(message);
-                    Console.WriteLine($"CLIENT: Data received: {response}");
-
-                    if (firstMessage)
+                    try
                     {
-                        Console.WriteLine("CLIENT: Initialising FEN");
-                        ScreenManager.Board.HasFen = response;
-                        firstMessage = false;
+                        byte[] message = new byte[1024];
+                        _socket.Receive(message);
+                        string response = Encoding.UTF8.GetString(message);
+                        Console.WriteLine($"CLIENT: Data received: {response}");
+
+                        if (firstMessage)
+                        {
+                            Console.WriteLine("CLIENT: Initialising FEN");
+                            ScreenManager.Board.HasFen = response;
+                            firstMessage = false;
+                        }
+                        else
+                        {
+                            // If a response is an update on the current position of the opposite player.
+                            if (response.Contains(":"))
+                            {
+                                (int, string, int) data = ScreenManager.Board.ParseMessage(response);
+                                ScreenManager.Board.PositionSelected = new(ScreenManager.Board.Tiles[data.Item1], ScreenManager.Board.Tiles[data.Item1].Piece);
+                                Console.WriteLine(data.Item1 + "-" + data.Item3);
+                                ScreenManager.Board.ChangePosition(ScreenManager.Board.Tiles[data.Item3]);
+                            }
+
+                            // If your own move has been validated.
+                            else if (response.Contains("T"))
+                            {
+                                ScreenManager.Board.GotReply = board.Board.Reply.TRUE;
+                            }
+                            else if (response.Contains("F"))
+                            {
+                                ScreenManager.Board.GotReply = board.Board.Reply.FALSE;
+                            }
+
+                            // if you won.
+                            else if (response.Contains("WON"))
+                            {
+                                ScreenManager.State = ScreenManager.ScreenState.WinState;
+                            }
+
+                            // If you lost.
+                            else if (response.Contains("LOST"))
+                            {
+                                ScreenManager.State = ScreenManager.ScreenState.LoseState;
+                            }
+                        }
                     }
-                    else
+                    catch (Exception e)
                     {
-                        // If a response is an update on the current position of the opposite player.
-                        if (response.Contains(":"))
-                        {
-                            (int, string, int) data = ScreenManager.Board.ParseMessage(response);
-                            ScreenManager.Board.PositionSelected = new(ScreenManager.Board.Tiles[data.Item1], ScreenManager.Board.Tiles[data.Item1].Piece);
-                            Console.WriteLine(data.Item1 + "-" + data.Item3);
-                            ScreenManager.Board.ChangePosition(ScreenManager.Board.Tiles[data.Item3]);
-                        }
 
-                        // If your own move has been validated
-                        else if (response.Contains("T"))
-                        {
-                            ScreenManager.Board.GotReply = board.Board.Reply.TRUE;
-                        }
-                        else if (response.Contains("F"))
-                        {
-                            ScreenManager.Board.GotReply = board.Board.Reply.FALSE;
-                        }
                     }
                 }
             }
+            _socket.Close();
         }
 
         public static Task Send(string message)
