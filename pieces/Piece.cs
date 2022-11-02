@@ -49,6 +49,14 @@ namespace Checkers.pieces
             TextureKingBlack = GetTexture(96, 96);
         }
 
+        public static void UnloadTextures()
+        {
+            UnloadTexture(TextureManWhite);
+            UnloadTexture(TextureKingWhite);
+            UnloadTexture(TextureManBlack);
+            UnloadTexture(TextureKingBlack);
+        }
+
         private static Texture2D GetTexture(int x, int y)
         {
             Image image = LoadImage("../../../res/Pieces2.png");

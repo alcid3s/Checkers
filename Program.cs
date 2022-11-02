@@ -43,5 +43,13 @@ namespace Checkers
 
             CloseWindow();
         }
+
+        public static void UnloadTextures()
+        {
+            UnloadTexture(LostSprite);
+            UnloadTexture(WonSprite);
+            UnloadTexture(MrBeanSprite);
+            Piece.UnloadTextures();
+        }
     }
 }
