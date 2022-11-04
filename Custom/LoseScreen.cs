@@ -83,6 +83,7 @@ namespace Checkers.Custom
 
             _exitBtn.OnAction += delegate
             {
+                Program.UnloadTextures();
                 Environment.Exit(0);
             };
         }
